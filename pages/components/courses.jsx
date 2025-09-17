@@ -1,6 +1,6 @@
 import Image from "next/image";
-import areas from '../../public/images/features.png'
-import { Fade,Zoom } from "react-reveal";
+import { motion } from 'framer-motion';
+
 
 
 const Courses = ()=>{
@@ -9,13 +9,13 @@ const Courses = ()=>{
         <section id="services" class="services">
 
       <div class="container" data-aos="fade-up">
-        <Fade top cascade>
+        <motion.div initial={{ opacity: 0, y: -50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
         <header class="section-header">
           <h2>Conheça nossos Cursos</h2>
           <p>Temos a sua disposição vários cursos dentre as areas supracitadas</p>
         </header>
-        </Fade>
-        <Fade bottom cascade>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
         <div class="row gy-4">
 
           <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
@@ -64,7 +64,7 @@ const Courses = ()=>{
           </div>
 
         </div>
-        </Fade>
+        </motion.div>
       </div>
 
     </section>

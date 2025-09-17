@@ -1,6 +1,7 @@
 import foto from '../../public/images/features1.png'
 import Image from "next/image";
-import { Fade,Zoom } from "react-reveal";
+import { motion } from 'framer-motion';
+
 
 
 const Marcation = ()=>{
@@ -10,31 +11,31 @@ const Marcation = ()=>{
       <div class="container">
 
         <div class="row content">
-            <Fade left>
+            <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}>
                 <div class="col-md-4" data-aos="fade-right">
                     <Image src={foto} class="img-fluid" alt=""/>
                 </div>
-            </Fade>
+            </motion.div>
           <div class="col-md-8 pt-4" data-aos="fade-up">
-            <Fade top cascade>
+            <motion.div initial={{ opacity: 0, y: -50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
                 <h3>Agende agora o seu atendimento presencial.</h3>
                 <p class="font-italic">
                   Algumas das principais vantagens e objetivos do agendamento <b>Online</b>.
                 </p>
-            </Fade>
-            <Fade right cascade>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
                 <ul>
                   <li><i class="bi-check"></i> <b>Evitar</b> as enchentes.</li>
                   <li><i class="bi-check"></i> <b>Proporcionar</b> atendimento de qualidade para todos.</li>
                   <li><i class="bi-check"></i> <b>Dedicar</b> mais tempo a um problema específico.</li>
                   <li><i class="bi-check"></i> <b>Melhorar</b> a experiência do usuário a 100%.</li>
                 </ul>
-            </Fade>
-            <Fade bottom>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}>
                 <p>
                     Só existem vantagens num serviço como este, adira ja e conte o seu feedback.
                 </p>
-            </Fade>
+            </motion.div>
           </div>
         </div>
         </div>

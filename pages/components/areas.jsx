@@ -1,6 +1,7 @@
 import Image from "next/image";
 import areas from '../../public/images/features.png'
-import { Fade,Zoom } from "react-reveal";
+import { motion } from 'framer-motion';
+
 
 
 const Areas = ()=>{
@@ -10,20 +11,20 @@ const Areas = ()=>{
         <section id="features" class="features">
 
         <div class="container" >
-            <Fade bottom cascade>
+            <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
             <header className="section-header">
                 <h2>Areas de Formação</h2>
                 <p>O nosso instituto conta com destintas áreas de formação, nomeadamente...</p>
             </header>
-            </Fade>
+            </motion.div>
         <div className="row">
-            <Fade left>
+            <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}>
             <div className="col-lg-6">
                 <Image src={areas} className="img-fluid" alt=""/>
             </div>
-            </Fade>
+            </motion.div>
           <div className="col-lg-6 mt-5 mt-lg-0 d-flex">
-            <Fade right cascade>
+            <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
             <div className="row align-self-center gy-4">
 
               <div className="col-md-6" >
@@ -62,7 +63,7 @@ const Areas = ()=>{
               </div>
 
             </div>
-            </Fade>
+            </motion.div>
           </div>
 
         </div>

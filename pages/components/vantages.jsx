@@ -2,7 +2,8 @@ import Image from "next/image";
 import vantage1 from '../../public/images/vantage1.png'
 import vantage2 from '../../public/images/vantage2.png'
 import vantage3 from '../../public/images/vantage3.png'
-import { Fade,Zoom } from "react-reveal";
+import { motion } from 'framer-motion';
+
 
 
 const Vantages = ()=>{
@@ -11,14 +12,14 @@ const Vantages = ()=>{
             <section id="vantages" className="vantages">
 
                 <div className="container" data-aos="fade-up">
-                    <Fade bottom cascade>
+                    <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
                         <header className="section-header">
                           <h2>Outras Vantagens</h2>
                           <p>Usando o nosso sistema só encontrarás facilidade</p>
                         </header>
-                    </Fade>
+                    </motion.div>
 
-                    <Fade right cascade>
+                    <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, staggerChildren: 0.15 }} viewport={{ once: true }}>
                         <div className="row">
 
                           <div className="col-lg-4" data-aos="fade-up" data-aos-delay="200">
@@ -50,7 +51,7 @@ const Vantages = ()=>{
                           </div>
                         
                         </div>
-                    </Fade>
+                    </motion.div>
                 </div>
 
             </section>
