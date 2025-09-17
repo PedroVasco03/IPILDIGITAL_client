@@ -1,0 +1,35 @@
+
+.container{
+    
+    height: 100%;
+    display: grid;
+    grid-template-columns: 18% 82%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.side{
+    margin-top: 70px;
+    overflow: hidden;
+}
+
+.content{
+    width: 100%;
+    grid-column: 2;
+    overflow: hidden;
+}
+
+@media (max-width: 950px) {
+    .container{
+        width: 100vw;
+        height: 100%;
+        display: flex;
+    }
+    
+    .content{
+        width: 100%;
+        
+    }
+}
