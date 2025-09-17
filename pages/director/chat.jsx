@@ -1,113 +1,122 @@
-import Image from "next/image"
-import { useEffect, useState } from "react"
-import Head from "next/head"
-import styleGeral from '../css/logado.module.css'
-import NavBarAluno from "./navbar"
-import SideBarAluno from "./sidebar"
-import { useRouter } from "next/router"
-import axios from "axios"
-import ModalMessage from "./components/modalMessage"
-import { Button} from "reactstrap"
-import imagem from '../../public/images/profile_user.png'
-function Chat(){
-    const router = useRouter()
-    const [datas, setDatas] = useState([])
-    const [send, setSend] = useState([])
-    const [tipo, setTipo] = useState([])
-    useEffect(()=>{
-        setInterval(()=>{
-            getAlunoData()
-            getEnviado()    
-        }, 2000)
-        
-       
-    },[])
-    
-    const getEnviado = async()=>{
-        let box = []
-        let box2 = []
-        const username = localStorage.getItem('usernameDirector')
-        await axios.get('http://localhost:5000/enviado').then((res)=>{            
-                res.data.map((item, index)=>{
-                    console.log(item)
-                    if(item.receptor === username){
-                            box.push(item.nome)
-                            box2.push(item.tipoSender)
-                    }
-                    else if(item.nome === username){
-                            box.push(item.receptor)
-                            box2.push(item.tipoReceiver)
-                    }
-                })
-            
-         })  
-         setTipo(box2)
-        setSend(box)
-       }
-    const getAlunoData = async ()=>{
-        try{
-            const data = localStorage.getItem('iddirector')
-            await axios.get(`http://localhost:5000/director/${data}`)
-            .then((res)=>{
-                setDatas(res.data)
-                if(res.data.permissao === 'Recusar')
-                    router.push('/login/director/login')
-            }).catch((err)=>{
-                router.push('/login/director/login')
-                console.log(err)
-            })
-            if(data == null){
-                router.push('/login/director/login')
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import Head from "next/head";
+import styleGeral from '../css/logado.module.css';
+import NavBarAluno from "./navbar";
+import SideBarAluno from "./sidebar";
+import { useRouter } from "next/router";
+import axios from "axios";
+import ModalMessage from "./components/modalMessage";
+import userImg from '../../public/images/profile_user.png';
+
+function Chat() {
+    const router = useRouter();
+    const [datas, setDatas] = useState([]);
+    const [send, setSend] = useState([]);
+    const [tipo, setTipo] = useState([]);
+    const [modal, setModal] = useState(false);
+
+    const toggleModal = () => setModal(!modal);
+    const modalClose = () => setModal(false);
+
+    const getEnviado = async () => {
+        const box = [];
+        const box2 = [];
+        const username = localStorage.getItem('usernameDirector');
+
+        const res = await axios.get('http://localhost:5000/enviado');
+        res.data.forEach(item => {
+            if (item.receptor === username) {
+                box.push(item.nome);
+                box2.push(item.tipoSender);
+            } else if (item.nome === username) {
+                box.push(item.receptor);
+                box2.push(item.tipoReceiver);
             }
-        }catch(err){
-            console.log(err)
+        });
+
+        setSend(box);
+        setTipo(box2);
+    };
+
+    const getAlunoData = async () => {
+        try {
+            const id = localStorage.getItem('iddirector');
+            const res = await axios.get(`http://localhost:5000/director/${id}`);
+            setDatas(res.data);
+
+            if (!res.data || res.data.permissao === 'Recusar') {
+                router.push('/login/director/login');
+            }
+
+            if (!id) router.push('/login/director/login');
+        } catch (err) {
+            console.log(err);
+            router.push('/login/director/login');
         }
-    }
-    const [modal, setModal] = useState(false)
-    const toggleModal = ()=> setModal(!modal)
-    const modalClose = ()=> setModal(false)
+    };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            getAlunoData();
+            getEnviado();
+        }, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div>
             <Head>
                 <title>Director | Chat</title>
-                <link rel="icon" type="png/ico" href="../public/images/chat.png"/>
+                <link rel="icon" type="png/ico" href="../public/images/chat.png" />
             </Head>
-            <NavBarAluno></NavBarAluno>
+
+            <NavBarAluno />
             <div className={styleGeral.container}>
-                <SideBarAluno/>
-                <div className={styleGeral.content}>            
+                <SideBarAluno />
+
+                <div className={styleGeral.content}>
                     <div className="d-flex w-100 mt-5">
-                            <Button className="m-3 mt-5" onClick={toggleModal} style={{float:'right'}}>Enviar mensagem</Button>                       
-                            <ModalMessage show={modal} closed={modalClose}></ModalMessage>
+                        <button className="btn btn-primary m-3 mt-5" onClick={toggleModal} style={{ float: 'right' }}>
+                            Enviar mensagem
+                        </button>
+                        <ModalMessage show={modal} closed={modalClose} />
                     </div>
-                    <div style={{paddingTop:'20px', width:'100%'  }}>
-                        {send.map((item, index)=>{
-                            
-                            return(
-                        <div class="list-group m-3">
-                            <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true" onClick={()=>{
-                                 localStorage.setItem('receptorDirector', item)
-                                 localStorage.setItem('tipoDirector', tipo[index])
-                                 router.push('/director/mensagem')
-                            }}>
-                            <Image src={imagem} alt="twbs" width="32" height="32" class="rounded-circle flex-shrink-0"/>
-                            <div class="d-flex gap-2 w-100 justify-content-between">
-                                <div>
-                                <h6 class="mb-0">{item}</h6>
-                                <p>{tipo[index]}</p>
-                                </div>
-                                <small class="opacity-50 text-nowrap">envie a sua mensagem</small>
+
+                    <div style={{ paddingTop: '20px', width: '100%' }}>
+                        {send.map((item, index) => (
+                            <div key={index} className="list-group m-3">
+                                <a
+                                    href="#"
+                                    className="list-group-item list-group-item-action d-flex gap-3 py-3"
+                                    onClick={() => {
+                                        localStorage.setItem('receptorDirector', item);
+                                        localStorage.setItem('tipoDirector', tipo[index]);
+                                        router.push('/director/mensagem');
+                                    }}
+                                >
+                                    <Image
+                                        src={userImg}
+                                        alt="user"
+                                        width={32}
+                                        height={32}
+                                        className="rounded-circle flex-shrink-0"
+                                    />
+                                    <div className="d-flex gap-2 w-100 justify-content-between">
+                                        <div>
+                                            <h6 className="mb-0">{item}</h6>
+                                            <p>{tipo[index]}</p>
+                                        </div>
+                                        <small className="opacity-50 text-nowrap">envie a sua mensagem</small>
+                                    </div>
+                                </a>
                             </div>
-                            </a>
-                        </div>
-                            )
-                        })}
+                        ))}
                     </div>
                 </div>
             </div>
         </div>
-
     );
 }
-export default Chat
 
+export default Chat;

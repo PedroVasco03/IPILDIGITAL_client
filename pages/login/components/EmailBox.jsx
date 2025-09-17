@@ -1,5 +1,5 @@
 import React from "react";
-import {validateEmail} from "./utils/regex"
+import {validateEmail} from "../../../utils/regex"
 import style from "../../css/Login.module.css"
 function EmailBox(){
     const [email, setEmail] = React.useState('');

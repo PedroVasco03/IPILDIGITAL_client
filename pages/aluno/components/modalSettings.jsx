@@ -1,469 +1,187 @@
-import { useEffect, useState, } from "react"
-import { Button, Form, Input,  Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap"
-import React from "react";
-import { validateBi, validateEmail, validateName, validatePassword, validateTelefone } from "@/pages/login/components/utils/regex";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { validateBi, validateEmail, validateName, validatePassword, validateTelefone } from "@/utils/regex";
 
-function  ModalSettings({show, close}){
-    const [desabilitado, setDesabilitado] = useState(false)
-    const [nome, setNome] = React.useState('');
-    const [nomeErr, setNomeErr] = React.useState('');
-    const [email, setEmail] = React.useState('');
-    const [emailErr, setEmailErr] = React.useState(false);
-    const [telefone, setTelefone] = React.useState('');
-    const [telefoneErr, setTelefoneErr] = React.useState('');
-    const [numbi, setNumBi] = React.useState('');
-    const [biErr, setBiErr] = React.useState('');
-    const [senha, setSenha] = React.useState('');
-    const [senhaErr, setSenhaErr] = React.useState(false);
-    const [sexo, setSexo] = React.useState('masculino');
-    const [curso, setCurso] = React.useState('');
-    const [area, setArea] = React.useState('');
-    const [classe, setClasse] = React.useState('');
-    const [turma, setTurma] = React.useState('');
-    const [numprocesso, setNumProcesso] = React.useState('');
-    const [check, setCheck] = useState(true)
-    const [update, setUpdate] = useState([])
-    const [upadate, setUpadate] = useState([])
-    const filterArea = (dado)=>{
+function ModalSettings({ show, close }) {
+    const router = useRouter();
+
+    const [check, setCheck] = useState(true);
+
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [telefone, setTelefone] = useState('');
+    const [numbi, setNumBi] = useState('');
+    const [senha, setSenha] = useState('');
+    const [sexo, setSexo] = useState('masculino');
+    const [curso, setCurso] = useState('');
+    const [area, setArea] = useState('');
+    const [classe, setClasse] = useState('');
+    const [turma, setTurma] = useState('');
+    const [numprocesso, setNumProcesso] = useState('');
+
+    const [update, setUpdate] = useState([]);
+    const [upadate, setUpadate] = useState([]);
+
+    const filterArea = (dado) => {
         if(dado === 'construcao_civil'){
-            const areaFormacao =['Selecione o curso','Desenhador Projetista', 'Técnico de Obras']
-            const course = ['','CP','CC']
-            setUpdate(areaFormacao)
-            setUpadate(course)  
-        }
-        if(dado === 'eletricidade'){
-            const areaFormacao =['Selecione o curso','Energia e Instalações Elétricas', 'Electrónica e Automação', 'Electrónica e Telecomunicações','Energias Renováveis']
-            const course = ['','EI','EA', 'ET', 'ER']
-            setUpdate(areaFormacao)
-            setUpadate(course)
-    
-
-        }
-        if(dado === 'informatica'){
-            const areaFormacao =['Selecione o curso','Técnico de Informática', 'Técnico de Gestão de Informática']
-            const course = ['','II','IG']
-            setUpdate(areaFormacao)
-            setUpadate(course)
-
-        }if(dado === 'mecanica'){
-            const areaFormacao =['Selecione o curso','Mecatrónica', 'Frio e Climatização', 'Electromecânica', 'Máquinas e Motores', 'Mecatrónica Autómovel', 'Metalomecânica']
-            const course = ['','MC','MF', 'ME', 'MM', 'MV','MT']
-            setUpdate(areaFormacao)
-            setUpadate(course)
-        }if(dado === 'quimica'){
-            const areaFormacao=['Selecione o curso','Ambiente e Controle de Dados', 'Química Industrial', 'Petroquímica','Bioquímica','Técnico de Técnicas de Laboratório']
-            const course = ['Selecione o curso','QA','QI', 'QP', 'QB', 'QT']
-            setUpdate(areaFormacao)
-            setUpadate(course)
+            setUpdate(['Selecione o curso','Desenhador Projetista', 'Técnico de Obras']);
+            setUpadate(['','CP','CC']);
+        } else if(dado === 'eletricidade'){
+            setUpdate(['Selecione o curso','Energia e Instalações Elétricas', 'Electrónica e Automação', 'Electrónica e Telecomunicações','Energias Renováveis']);
+            setUpadate(['','EI','EA','ET','ER']);
+        } else if(dado === 'informatica'){
+            setUpdate(['Selecione o curso','Técnico de Informática', 'Técnico de Gestão de Informática']);
+            setUpadate(['','II','IG']);
+        } else if(dado === 'mecanica'){
+            setUpdate(['Selecione o curso','Mecatrónica', 'Frio e Climatização', 'Electromecânica', 'Máquinas e Motores', 'Mecatrónica Automóvel','Metalomecânica']);
+            setUpadate(['','MC','MF','ME','MM','MV','MT']);
+        } else if(dado === 'quimica'){
+            setUpdate(['Selecione o curso','Ambiente e Controle de Dados', 'Química Industrial', 'Petroquímica','Bioquímica','Técnico de Técnicas de Laboratório']);
+            setUpadate(['','QA','QI','QP','QB','QT']);
         }
     }
-    function handleChangue({target}){
-        setSexo(target.value);
-    }
-    
-    function deteta (e){
-        const Code = (e.charCode ? e.charCode : e.wich);
-        if(Code > 40 && Code <=62){
-            e.preventDefault()
-        }
-    }
-    function detetaNum (e){
-        const Code = (e.charCode ? e.charCode : e.wich);
-        if(Code < 40 || Code > 58){
-            e.preventDefault()
-        }
-    }
-    const validate = () => {
-        if(!validateName.test(nome)){
-            setNomeErr(true)
-            setDesabilitado(true)
-        }else{
-            setNomeErr(false)
-            setDesabilitado(false)
-        }
-        if(!validateEmail.test(email)){
-            setEmailErr(true)
-            setDesabilitado(true)
-        }else{
-            setEmailErr(false)
-            setDesabilitado(false)
-        }
-        if(!validateTelefone.test(telefone)){
-            setTelefoneErr(true)
-            setDesabilitado(true)
-        }else{
-            setTelefoneErr(false)
-            setDesabilitado(false)
-        }
-        if(!validateBi.test(numbi)){
-            setBiErr(true)
-            setDesabilitado(true)
-        }else{
-            setBiErr(false)
-            setDesabilitado(false)
-        }
-        if(!validatePassword.test(senha)){
-            setSenhaErr(true)
-            setDesabilitado(true)
-        }else{
-            setSenhaErr(false)
-            setDesabilitado(false)
-        }
-    }
-    useEffect(()=>{
-        getData()
-    },[])
-    const router =useRouter()
-    const getData = async ()=>{
-        const value = localStorage.getItem('idaluno') 
-        await axios.get(`http://localhost:5000/aluno/${value}`).then((res)=>{ 
-            console.log(res.data)
-            setNome(res.data.nome)
-            setEmail(res.data.email)
-            setNumBi(res.data.bi)
-            setTelefone(res.data.telefone)
-            setSenha(res.data.senha)
-            setSexo(res.data.sexo)
-            setNumProcesso(res.data.numeroprocesso)
-    }).catch((err)=>{
-        console.log(err)
-    })
-    }
-    const save = async ()=>{
-        
-        const data = localStorage.getItem('idaluno')
-    if(nome !="" && numbi!=""&& classe!="" && curso!="" && area!="" && telefone !="" && senha!="" && turma !="" && numprocesso !=""){
-        
-        alert('informações actualizadas com sucesso')
-        await axios.patch(`http://localhost:5000/aluno/${data}`,{
-            nome: nome,
-            bi: numbi,
-            classe: classe,
-            curso: curso,
-            area: area,
-            sexo: sexo,
-            telefone: telefone,
-            senha: senha, 
-            turma: turma,
-            numprocesso: numprocesso,                
-        })
-        
-        localStorage.removeItem('idaluno')
-        router.push('/login/aluno/LoginAluno')
-    }
-    }
-    return(
-        <div>
-            <Modal isOpen={show} onClosed={close}>
-                <ModalHeader toggle={close}>
-                    <h2>Editar dados </h2>
-                </ModalHeader>
-                <Form >
-                <ModalBody>
-                <div>
-            <div>
-           
-            <Input
-                className="m-2"
-                readOnly={check}
-                type="text"
-                name="usernew"
-                placeholder="Nome"
-                value={nome}
-                id="nome"
-                onKeyPress={deteta}
-                onChange={
-                    (event) => {
-                    const nome = event.target.value
-                    setNome (event.target.value)
-                    setNomeErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setNext('')
-                            setError('Dados digitados já existem')
-                        }
 
-                    }
-                    else{
-                        setNext('')
-                    }
-                }
-
-                }
-            onBlur={validate}
-            required={true}
-            />
-        </div>
-        {nomeErr && <p>Por favor digite nome válido</p>}
-
-        <div className="m-2">
-           
-            <Input
-                readOnly={check}
-                type="text"
-                name="email"
-                placeholder="Email"
-                value={email}
-                onChange={(event) =>{
-                    const mail = event.target.value
-                    setEmail(event.target.value)
-                    setEmailErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(mail) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-
-                        }
-                        else{
-                            setNext('')
-                            setError('Dados digitados já existem')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                }}
-                onBlur={validate}
-                required={true}
-            />
-        </div>
-        {emailErr && <small>Por favor  digite um email válido</small>}
-
-        <div className="m-2">
-            
-            <Input
-                readOnly={check}
-                type="text"
-                name="mailnew"
-                placeholder="Telefone"
-                maxLength={11}
-                minLength={9}
-                value={telefone}
-                onKeyPress={detetaNum}
-                onChange={
-                    (event) => {
-                    const cellphone = event.target.value
-                    setTelefone (event.target.value)
-                    setTelefoneErr(false)
-                    setDesabilitado(false)
-
-                    if(validateName.test(nome) && validateTelefone.test(cellphone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setError('Dados digitados já existem')
-                            setNext('')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                    }
-                }
-                onBlur={validate}
-                required={true}
-            />
-        </div>
-        {telefoneErr && <small>Por favor digite número válido EX: "999-999-999"</small>}
-       
-    </div>
-    <div>
-        <div className="m-2">
-            <Input
-                readOnly={check}
-                type="text"
-                name="binew"
-                placeholder="Bilhete de identidade"
-                maxLength={14}
-                value={numbi}
-                onChange={
-                    (event) => {
-                    const bi = event.target.value
-                    setNumBi (event.target.value)
-                    setBiErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(bi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setError('Dados digitados já existem')
-                            setNext('')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                }
-                }
-                onBlur={validate}
-                required={true}
-                />
-            </div>
-            {biErr && <small>Por favor digite numero do bilhete válido</small>}
-            <div className="m-2">
-                    <Input
-                        
-                        readOnly={check}
-                        type="number" 
-                        name="processnumber" 
-                        placeholder="Número de Processo" 
-                        value={numprocesso}
-                        required={true}
-                        onKeyPress={deteta}
-                        onChange={(event) => {
-                            console.log(numprocesso)
-                            setNumProcesso(event.target.value)}}
-                    />
-                </div>
-                <div>
-                <Input 
-                    type="select"
-                    className="m-2"
-                    readOnly={check}
-                    value={area} 
-                    onChange={({target}) => {
-                        setArea (target.value)
-                        filterArea(target.value)
-                    }} 
-                    id="area"
-                >
-                    <option disabled value="">Selecione a área</option>
-                    <option value="construcao_civil">Construção Civil</option>
-                    <option value="eletricidade">Eletricidade</option>
-                    <option value="informatica">Informática</option>
-                    <option value="mecanica">Mecanica</option>
-                    <option value="quimica">Química</option>
-                    required={true}
-                </Input>
-                </div>
-        
-    </div>
-    <div>
-        <div className="m-2">
-           
-            <Input type='select' name="curso" value={curso} onChange={(event) => setCurso (event.target.value)} readOnly={check}>
-                    {update.map((item, index)=>(
-                        <option value={upadate[index]}>{item}</option>
-                    ))}
-                required={true}
-            </Input>
-        </div>
-        <div className="m-2">
-            
-            <Input type="select" name="classe"  value={classe} onChange={(event) => setClasse (event.target.value)} readOnly={check}>
-                <option disabled value="">Selecione a classe</option>
-                <option value="10">10ª classe</option>
-                <option value="11">11ª classe</option>
-                <option value="12">12ª classe</option>
-                <option value="13">13ª classe</option>
-                required={true}
-            </Input>
-        </div>
-        <div className="m-2">
-        <Input name="turma" type="select"  value={turma} onChange={(event) => setTurma (event.target.value)}>
-                            <option disabled value="">Selecione a turma</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="C">D</option>         
-        </Input>
-        </div>
-    </div>
-    <div>
-        <div className="m-2">
-               
-                <Input
-                    readOnly={check}
-                    type="password"
-                    name="password"
-                    placeholder="Senha"
-                    maxLength={8}
-                    value={senha}
-                    onChange={
-                            (event) => {
-                                const password = event.target.value
-                            setSenha (event.target.value)
-                            setSenhaErr(false)
-                            setDesabilitado(false)
-                            if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(password)){
-                                const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                                if(fetchData.length == 0){
-                                    setError('')
-                                    setNext('/login/aluno/ProsseguirAluno')
-                                }
-                                else{
-                                    setError('Dados digitados já existem')
-                                    setNext('')
-                                }
-                            }
-                            else{
-                                setNext('')
-                            }
-                        }
-
-                    }
-                    onBlur={validate}
-                    required={true}
-                />
-            </div>
-            {senhaErr &&
-                <small>
-                    A senha deve incluir: 8 dígitos , incluíndo uma letra maiúscula e um número
-                </small>
+    useEffect(() => {
+        const getData = async () => {
+            const value = localStorage.getItem('idaluno');
+            try {
+                const res = await axios.get(`http://localhost:5000/aluno/${value}`);
+                setNome(res.data.nome);
+                setEmail(res.data.email);
+                setNumBi(res.data.bi);
+                setTelefone(res.data.telefone);
+                setSenha(res.data.senha);
+                setSexo(res.data.sexo);
+                setNumProcesso(res.data.numeroprocesso);
+                setClasse(res.data.classe);
+                setCurso(res.data.curso);
+                setArea(res.data.area);
+                setTurma(res.data.turma);
+            } catch(err) {
+                console.log(err);
             }
+        }
+        if(show) getData();
+    }, [show]);
 
-                <div className="m-2"  onChange={(event) => setSexo (event.target.value)}>
-                    <p>Sexo</p>
-                    <div className="radio-field div" >
-                        <label htmlFor="masculino" >Masculino</label>
-                        <Input
-                            readOnly={check}
-                            type="radio"
-                            value="masculino"
-                            id="masculino"
-                            className="input mx-1"
-                            checked={sexo === 'masculino'}
-                            onChange={handleChangue}
-                        />
-                        <label className="mx-2" htmlFor="feminino">Feminino</label>
-                        <Input
-                            readOnly={check}
-                            type="radio"
-                            id="feminino"
-                            value="feminino"
-                            className="input mx-1"
-                            checked={sexo==='feminino'}
-                            onChange={handleChangue}
-                        />
+    const save = async () => {
+        const data = localStorage.getItem('idaluno');
+        if(nome && email && telefone && numbi && senha && curso && area && classe && turma && numprocesso){
+            await axios.patch(`http://localhost:5000/aluno/${data}`, {
+                nome, bi: numbi, telefone, senha, sexo,
+                curso, area, classe, turma, numprocesso
+            });
+            alert("Informações atualizadas com sucesso!");
+            localStorage.removeItem('idaluno');
+            router.push('/login/aluno/LoginAluno');
+        } else {
+            alert("Por favor, preencha todos os campos corretamente.");
+        }
+    }
+
+    return (
+        <div className={`modal fade ${show ? 'show d-block' : ''}`} tabIndex="-1">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Editar Dados</h5>
+                        <button type="button" className="btn-close" onClick={close}></button>
+                    </div>
+                    <div className="modal-body">
+                        <form>
+                            <div className="mb-3">
+                                <label className="form-label">Nome</label>
+                                <input type="text" className="form-control" value={nome} readOnly={check}
+                                    onChange={e => setNome(e.target.value)} />
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Email</label>
+                                <input type="email" className="form-control" value={email} readOnly={check}
+                                    onChange={e => setEmail(e.target.value)} />
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Telefone</label>
+                                <input type="text" className="form-control" value={telefone} readOnly={check}
+                                    onChange={e => setTelefone(e.target.value)} />
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Bilhete de Identidade</label>
+                                <input type="text" className="form-control" value={numbi} readOnly={check}
+                                    onChange={e => setNumBi(e.target.value)} />
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Senha</label>
+                                <input type="password" className="form-control" value={senha} readOnly={check}
+                                    onChange={e => setSenha(e.target.value)} />
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Sexo</label>
+                                <div>
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input" type="radio" name="sexo" value="masculino"
+                                            checked={sexo === 'masculino'} onChange={e => setSexo(e.target.value)} />
+                                        <label className="form-check-label">Masculino</label>
+                                    </div>
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input" type="radio" name="sexo" value="feminino"
+                                            checked={sexo === 'feminino'} onChange={e => setSexo(e.target.value)} />
+                                        <label className="form-check-label">Feminino</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Área</label>
+                                <select className="form-select" value={area} onChange={e => { setArea(e.target.value); filterArea(e.target.value) }}>
+                                    <option value="">Selecione a área</option>
+                                    <option value="construcao_civil">Construção Civil</option>
+                                    <option value="eletricidade">Eletricidade</option>
+                                    <option value="informatica">Informática</option>
+                                    <option value="mecanica">Mecânica</option>
+                                    <option value="quimica">Química</option>
+                                </select>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Curso</label>
+                                <select className="form-select" value={curso} onChange={e => setCurso(e.target.value)}>
+                                    {update.map((item, idx) => <option key={idx} value={upadate[idx]}>{item}</option>)}
+                                </select>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Classe</label>
+                                <select className="form-select" value={classe} onChange={e => setClasse(e.target.value)}>
+                                    <option value="">Selecione a classe</option>
+                                    <option value="10">10ª Classe</option>
+                                    <option value="11">11ª Classe</option>
+                                    <option value="12">12ª Classe</option>
+                                    <option value="13">13ª Classe</option>
+                                </select>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Turma</label>
+                                <select className="form-select" value={turma} onChange={e => setTurma(e.target.value)}>
+                                    <option value="">Selecione a turma</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                </select>
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Número do Processo</label>
+                                <input type="text" className="form-control" value={numprocesso} onChange={e => setNumProcesso(e.target.value)} />
+                            </div>
+                        </form>
+                    </div>
+                    <div className="modal-footer">
+                        <button className="btn btn-primary" onClick={save}>Salvar</button>
+                        <button className="btn btn-secondary" onClick={() => setCheck(false)}>Editar</button>
+                        <button className="btn btn-danger" onClick={close}>Fechar</button>
                     </div>
                 </div>
-               </div> 
-                </ModalBody>
-                <ModalFooter>
-                    <Button type="submit" onClick={()=>{
-                        save() 
-                    }}>Salvar</Button>
-                    <Button onClick={()=>setCheck(false)}>Editar</Button>
-                </ModalFooter>
-                </Form>
-            </Modal>
+            </div>
         </div>
-    )
+    );
 }
-export default ModalSettings
+
+export default ModalSettings;

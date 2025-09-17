@@ -2,8 +2,6 @@ import NavBarCoordenacao from "./navbar"
 import styleGeral from '../css/logado.module.css'
 import AccordionComponent from "./components/accordion"
 import Head from "next/head"
-import SideBarCoordenacao from "./sidebar"
-import { AccordionBody, Button, Card, CardBody, Label } from "reactstrap"
 import { useEffect } from "react"
 import { useState } from "react"
 import { useRouter } from "next/router"

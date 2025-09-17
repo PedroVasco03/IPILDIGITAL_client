@@ -1,5 +1,5 @@
 import React from "react";
-import {validatePassword} from "./utils/regex"
+import {validatePassword} from "../../../utils/regex"
 import style from "../../css/Login.module.css"
 
 function PasswordBox(){

@@ -9,7 +9,7 @@ import GenderField from "./GenderField";
 import ButtonConfirm from "./ButtonConfirm";
 import CourseBox from "./CourseBox";
 import NumProcessBox from "./NumProcessBox";
-import { validateName, validateEmail, validateTelefone, validateBi, validatePassword} from "./utils/regex";
+import { validateName, validateEmail, validateTelefone, validateBi, validatePassword} from "../../../utils/regex";
 import style from "../../css/Login.module.css"
 import { useEffect } from "react";
 import axios from "axios";

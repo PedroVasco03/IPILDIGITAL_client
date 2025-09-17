@@ -1,23 +1,35 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { Button, Form, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap"
+import React from "react";
 
-function ModalView({show, closed, senha, mensagem, dia}){
-   
-    return(
-        <div>
-            <Modal isOpen={show} onClosed={closed}>
-                <ModalHeader toggle={closed}>
-                    <h2>Marcação</h2>
-                </ModalHeader>
-                <ModalBody>
-                   <p>Senha : {senha}</p>
-                   <p>Dia de atendimento: {dia}</p>
-                   <p>Mensagem:</p>
-                   <textarea style={{borderRadius:'10px',borderColor:'darkgray'}} name="" id="" cols="30" rows="10" className="w-100 p-2 input" readOnly value={mensagem}></textarea>
-                </ModalBody>
-            </Modal>
+function ModalView({ show, closed, senha, mensagem, dia }) {
+    if (!show) return null;
+
+    return (
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+            <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Marcação</h5>
+                        <button type="button" className="btn-close" onClick={closed}></button>
+                    </div>
+                    <div className="modal-body">
+                        <p><strong>Senha:</strong> {senha}</p>
+                        <p><strong>Dia de atendimento:</strong> {dia}</p>
+                        <p><strong>Mensagem:</strong></p>
+                        <textarea
+                            className="form-control"
+                            style={{ borderRadius: "10px", borderColor: "darkgray" }}
+                            rows={10}
+                            readOnly
+                            value={mensagem}
+                        ></textarea>
+                    </div>
+                    <div className="modal-footer">
+                        <button className="btn btn-secondary" onClick={closed}>Fechar</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
-export default ModalView
+
+export default ModalView;

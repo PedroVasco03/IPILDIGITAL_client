@@ -2,7 +2,6 @@ import NavBarCoordenacao from "./navbar"
 import Head from "next/head"
 import styleGeral from '../css/logado.module.css'
 import SideBarCoordenacao from "./sidebar"
-import { Button, Card, CardBody, CardFooter } from "reactstrap";
 import ModalCreate from "./components/modalCreate";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";

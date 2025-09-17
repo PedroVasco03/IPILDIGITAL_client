@@ -1,176 +1,162 @@
-import React from "react";
-import {validateEmail,validatePassword} from "../../components/utils/regex"
-import style from "../../../css/Login.module.css"
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { validateEmail, validatePassword } from "../../../../utils/regex";
+import style from "../../../css/Login.module.css";
 import axios from "axios";
 import Link from "next/link";
-import { Label } from "reactstrap";
 import { useRouter } from "next/router";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 
-const socket = io('http://localhost:5000'); // Inicia o cliente Socket.IO 
-function SignInForm(){
-    const router = useRouter()
-   const [aluno, setAluno] = useState([])
-   const [danger, setDanger] = useState('')
-   const [next, setNext] = useState('')
-   useEffect(()=>{
-        setInterval(()=>{
-            getAluno()
-        },1000)
-       
-   },[])
+const socket = io('http://localhost:5000');
 
-   const cadastrar = ()=>{
-    try{
-        if(email!="" && senha!=""){
-            if(validateEmail.test(email) && validatePassword.test(senha)){
-                const search = aluno.filter((data)=> data.email === email && data.senha === senha)
-                if(search.length==0){
-                    setDanger('dados não encontrados!')
-                }
-                search.map(async (data)=>{
-                    if(data.permissao=='Recusar'){
-                       setDanger('Acesso negado para este usuário!')
-                        setNext('')
-                    }
-                    else if(data.permissao=='Permitir'){                
-                        localStorage.setItem('idaluno', data.id)        
-                        setDanger('Acesso Permitido')
-                        router.push('/aluno/inicio')
-                        localStorage.setItem('usernameAluno', data.nome)
-                        await axios.get('http://localhost:5000/coordenador')
-                        .then((response)=>{
-                            const search = response.data.filter((dado)=>dado.area === data.area)
-                            localStorage.setItem('coordenador',search[0].id)
-                        }).catch((err)=>{
-                            console.log(err)
-                        })
+function SignInForm() {
+    const router = useRouter();
 
-                        await axios.get('http://localhost:5000/director')
-                        .then((response)=>{
-                           localStorage.setItem('director',response.data[0].id)
-                        }).catch((err)=>{
-                            console.log(err)
-                        })    
-                    }
-                    else if(data.permissao==null){
-                        setDanger('A sua conta será avaliada pelo o Administrador')
-                        setNext('')
-                    }
-                    
-                })
-                
-            }
+    const [aluno, setAluno] = useState([]);
+    const [danger, setDanger] = useState('');
+    const [next, setNext] = useState('');
+    const [email, setEmail] = useState('');
+    const [emailErr, setEmailErr] = useState(false);
+    const [senha, setSenha] = useState('');
+    const [senhaErr, setSenhaErr] = useState(false);
+    const [type, setType] = useState('password');
+    const [btnOn, setBtn] = useState('d-none');
+    const [desabilitado, setDesabilitado] = useState(false);
+
+    useEffect(() => {
+        const interval = setInterval(getAluno, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const getAluno = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/aluno');
+            setAluno(response.data);
+        } catch (err) {
+            console.log(err);
         }
-    }catch(err){
-        console.log(err)
-    }
-}
-    const getAluno = async ()=>{
-        await axios.get('http://localhost:5000/aluno')
-        .then((response)=>{
-            setAluno(response.data)
-        })
+    };
 
-       
-    }
-    
-    const [desabilitado, setDesabilitado] = React.useState(false)
-    
-    const [email, setEmail] = React.useState('');
-    const [emailErr, setEmailErr] = React.useState(false);
-    const [senha, setSenha] = React.useState('');
-    const [senhaErr, setSenhaErr] = React.useState(false);
-    const [type, setType]= React.useState('Password')
-    const [btnOn, setBtn]=React.useState('Login_esconde__V2IYL')
+    const cadastrar = async () => {
+        try {
+            if (email && senha) {
+                if (validateEmail.test(email) && validatePassword.test(senha)) {
+                    const search = aluno.filter(data => data.email === email && data.senha === senha);
+
+                    if (search.length === 0) {
+                        setDanger('Dados não encontrados!');
+                        return;
+                    }
+
+                    for (const data of search) {
+                        if (data.permissao === 'Recusar') {
+                            setDanger('Acesso negado para este usuário!');
+                            setNext('');
+                        } else if (data.permissao === 'Permitir') {
+                            localStorage.setItem('idaluno', data.id);
+                            localStorage.setItem('usernameAluno', data.nome);
+                            setDanger('Acesso Permitido');
+                            router.push('/aluno/inicio');
+
+                            try {
+                                const coord = await axios.get('http://localhost:5000/coordenador');
+                                const filtered = coord.data.filter(dado => dado.area === data.area);
+                                localStorage.setItem('coordenador', filtered[0]?.id);
+                            } catch (err) { console.log(err); }
+
+                            try {
+                                const director = await axios.get('http://localhost:5000/director');
+                                localStorage.setItem('director', director.data[0]?.id);
+                            } catch (err) { console.log(err); }
+
+                        } else if (data.permissao == null) {
+                            setDanger('A sua conta será avaliada pelo Administrador');
+                            setNext('');
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     const showPassword = () => {
-        if(type==='Text'){
-            setType('Password')
-            setBtn('Login_esconde__V2IYL')
+        if (type === 'text') {
+            setType('password');
+            setBtn('d-none');
+        } else {
+            setType('text');
+            setBtn('');
         }
-        else{
-        setType('Text')
-        setBtn('')
-        }
-    }
-    const validate = () => {
-        if(!validateEmail.test(email)){
-            setEmailErr(true)
-            setDesabilitado(true)
-        }else{
-            setEmailErr(false)
-            setDesabilitado(false)
-        }
-        if(!validatePassword.test(senha)){
-            setSenhaErr(true)
-            setDesabilitado(true)
-        }else{
-            setSenhaErr(false)
-            setDesabilitado(false)
-        }
-    }
-   
-    return(
-        <>
-            <form className={style.sign_in_form+" " +style.form}>
-                <h2 className={style.title + " " +style.h2}>Entrar</h2>
-                <div className={style.input_field + " " +style.div}>
-                    <i className={"bi-envelope-fill"+" "+ style.i}></i>
-                    <input 
-                        type="text" 
-                        name="email" 
-                        placeholder="Email" 
-                        className={style.input}
-                        value={email}
-                        onChange={(event) =>{
-                            setNext('') 
-                            setDanger('')
-                            setEmail(event.target.value)
-                            setEmailErr(false)
-                            setDesabilitado(false)
-                        }}
-                        onBlur={validate}
-                        required={true}
+    };
 
-                        
-                    />
-                </div>
-            {emailErr && <small className={style.error}>Por favor  digite um email válido</small>}
+    const validateFields = () => {
+        setEmailErr(!validateEmail.test(email));
+        setSenhaErr(!validatePassword.test(senha));
+        setDesabilitado(!validateEmail.test(email) || !validatePassword.test(senha));
+    };
 
-            <div className={style.input_field +" "+style.div}>
-                <i className={"bi-lock-fill "+style.i}></i>
-                <input 
+    return (
+        <form className={`${style.sign_in_form} ${style.form}`}>
+            <h2 className={`${style.title} ${style.h2}`}>Entrar</h2>
+
+            <div className={`${style.input_field} ${style.div}`}>
+                <i className={`bi-envelope-fill ${style.i}`}></i>
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className={style.input}
+                    value={email}
+                    onChange={e => {
+                        setNext('');
+                        setDanger('');
+                        setEmail(e.target.value);
+                        setEmailErr(false);
+                        setDesabilitado(false);
+                    }}
+                    onBlur={validateFields}
+                    required
+                />
+            </div>
+            {emailErr && <small className="text-danger">Por favor digite um email válido</small>}
+
+            <div className={`${style.input_field} ${style.div}`}>
+                <i className={`bi-lock-fill ${style.i}`}></i>
+                <input
                     type={type}
-                    name="password" 
+                    name="password"
                     placeholder="Senha"
                     className={style.input}
                     minLength={8}
                     value={senha}
-                    onChange={
-                        (event) => {
-                        setDanger('')
-                        setNext('')
-                        setSenha (event.target.value)
-                        setSenhaErr(false)
-                        setDesabilitado(false)}
-                    } 
-                    onBlur={validate}
-                    required={true}
+                    onChange={e => {
+                        setDanger('');
+                        setNext('');
+                        setSenha(e.target.value);
+                        setSenhaErr(false);
+                        setDesabilitado(false);
+                    }}
+                    onBlur={validateFields}
+                    required
                 />
-                <i className={style.olhos+ " bi-eye-fill "+style.i} onClick={showPassword}></i>
-                <i className={style.olhos+ " bi-eye-slash-fill "+style.i+" "+btnOn} onClick={showPassword}></i>
+                <i className={`${style.olhos} bi-eye-fill ${style.i}`} onClick={showPassword}></i>
+                <i className={`${style.olhos} bi-eye-slash-fill ${style.i} ${btnOn}`} onClick={showPassword}></i>
             </div>
-            {senhaErr && <small className={style.error}>Pelo menos 6 digitos incluindo letras e numeros
-                        </small>}
-             <Label className="text-danger">{danger}</Label>   
-             <Link href={''} className={style.btn+" "+ style.solid+" "+ style.input +" text-center p-2 text-decoration-none text-white"} onClick={cadastrar}>
+            {senhaErr && <small className="text-danger">Pelo menos 6 dígitos, incluindo letras e números</small>}
+
+            {danger && <div className="text-danger my-2">{danger}</div>}
+
+            <button
+                type="button"
+                className={`btn btn-primary w-100 mt-3 ${style.input}`}
+                onClick={cadastrar}
+                disabled={desabilitado}
+            >
                 Logar
-             </Link>
-            </form>
-        </>
-    )
+            </button>
+        </form>
+    );
 }
 
-export default SignInForm
+export default SignInForm;

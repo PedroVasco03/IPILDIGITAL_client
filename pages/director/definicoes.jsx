@@ -1,151 +1,114 @@
-import NavBarCoordenacao from "./navbar"
-import styleGeral from '../css/logado.module.css'
-import AccordionComponent from "./components/accordion"
-import Head from "next/head"
-import SideBarCoordenacao from "./sidebar"
-import { AccordionBody, Button, Card, CardBody, Label } from "reactstrap"
-import { useEffect } from "react"
-import { useState } from "react"
-import { useRouter } from "next/router"
-import axios from "axios"
-import ModalSetting from "./components/modalSettings"
-import ModalAlert from "./modalAlert"
+import NavBarCoordenacao from "./navbar";
+import styleGeral from '../css/logado.module.css';
+import SideBarCoordenacao from "./sidebar";
+import Head from "next/head";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import axios from "axios";
+import ModalSetting from "./components/modalSettings";
+import ModalAlert from "./modalAlert";
 
-function Settings(){
-    const [datas, setDatas] = useState([])
-    const router = useRouter()
-    const [modal, setModal] = useState(false)
-    const toggleModal = ()=> setModal(!modal)
-    const modalClose = ()=> setModal(false)
-    const [modal2, setModal2] = useState(false)
-    const toggleModal2 = ()=> setModal2(!modal)
-    const modalClose2 = ()=> setModal2(false)
-    const [id, setId] = useState('')
-    useEffect(()=>{
-        setInterval(()=>{
-            getAlunoData()
-        }, 1000)
-     },[])
-     const getAlunoData = async ()=>{
-         try{
-             const data = localStorage.getItem('iddirector')
-             await axios.get(`http://localhost:5000/director/${data}`)
-             .then((res)=>{
-                 setData(res.data)
-                 if(res.data.permissao === 'Recusar')
-                    router.push('/login/director/login')
-             }).catch((err)=>{
-              router.push('/login/director/login')
-                 console.log(err)
-             })
-             if(data == null)
-                 router.push('/login/director/login')
-         }catch(err){
-             console.log(err)
-         }
-     }
-    const [data, setData ] = useState({})
-    try{
-    return <div>
-        <Head>
-            <title>Director | Definicoes</title>
-            <link rel="icon" type="png/ico" href="../public/images/chat.png"/>
-        </Head>
-        <NavBarCoordenacao/>
-        <div className={styleGeral.container}>
-            <SideBarCoordenacao/>
-            <div className={styleGeral.content}>
-                <div className="w-100 p-2 mt-5">
-                <div class="card mb-4 mt-5 bg-white m-4">
-                <div class="card-body text-center">
-                    <h5 class="my-3">{data.nome}</h5>
-                    <p class="text-muted mb-1"></p>
-                    <p class="text-muted mb-4"></p>
-                    <div class="d-flex justify-content-center mb-2">
-                    </div>
-                    </div>
-                </div>
-                <div class="card mb-4 m-4">
-            <div class="card-body bg-white">
-              <div class="row">
-                <div class="col-sm-3">
-                  <p class="mb-0">Nome</p>
-                </div>
-                <div class="col-sm-9">
-                  <p class="text-muted mb-0">{data.nome}</p>
-                </div>
-              </div>
-              <hr/>
-              <div class="row">
-                <div class="col-sm-3">
-                  <p class="mb-0">Email</p>
-                </div>
-                <div class="col-sm-9">
-                  <p class="text-muted mb-0">{data.email}</p>
-                </div>
-              </div>
-              <hr/>
-              <div class="row">
-                <div class="col-sm-3">
-                  <p class="mb-0">Bilhete de Identidade</p>
-                </div>
-                <div class="col-sm-9">
-                  <p class="text-muted mb-0">{data.bi}</p>
-                </div>
-              </div>
-              <hr/>
-              <div class="row">
-                <div class="col-sm-3">
-                  <p class="mb-0">Telefone</p>
-                </div>
-                <div class="col-sm-9">
-                  <p class="text-muted mb-0">{data.telefone}</p>
-                </div>
-              </div>
-              <hr/>
-              <div class="row">
-                <div class="col-sm-3">
-                  <p class="mb-0">Sexo</p>
-                </div>
-                <div class="col-sm-9">
-                  <p class="text-muted mb-0">{data.sexo}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="card mb-5 m-4" style={{borderRadius:'15px'}}>
-            <div class="card-body p-4">
-              <h3 class="mb-3">Senha</h3>
-              <p class="small mb-0"><i class="far fa-star fa-lg"></i> <span class="mx-2">{data.senha}</span> </p>
-              <hr class="my-4"/>
-              <div class="d-flex justify-content-start align-items-center">
-                <p class="mb-0 text-uppercase"><i class="fas fa-cog me-2"></i> <span class="text-muted small"></span></p>
-                <p class="mb-0 text-uppercase"><i class="fas fa-link ms-4 me-2"></i> <span class="text-muted small"></span></p>
-                <p class="mb-0 text-uppercase"><i class="fas fa-ellipsis-h ms-4 me-2"></i> <span class="text-muted small"></span></p>
-                <a href="#!">
-                  
-                </a>
-              </div>
-            </div>
-          </div>
-          <button type="button" class="btn btn-outline-danger m-4" onClick={()=>{
-              const iddirector = localStorage.getItem('iddirector')
-              setId(iddirector)
-              toggleModal2()
-          }} data-mdb-ripple-color="dark" style={{zIndex:'1'}}>
-                  Eliminar conta
-          </button>
-          <button type="button" class="btn btn-outline-primary m-2" onClick={toggleModal} data-mdb-ripple-color="dark" style={{zIndex:'1'}}>
-                  Editar dados
-          </button>
-                <ModalSetting show={modal} closed={modalClose}></ModalSetting>
-                <ModalAlert show={modal2} closed={modalClose2} id={id} route={'director'} />
-            </div>
-                </div>    
-        </div>
-    </div>;
-    }catch(err){
-        console.log(err)
+function Settings() {
+  const [data, setData] = useState({});
+  const router = useRouter();
+  const [modal, setModal] = useState(false);
+  const [modal2, setModal2] = useState(false);
+  const [id, setId] = useState('');
+
+  useEffect(() => {
+    const interval = setInterval(getAlunoData, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getAlunoData = async () => {
+    try {
+      const dataId = localStorage.getItem('iddirector');
+      if (!dataId) return router.push('/login/director/login');
+      const res = await axios.get(`http://localhost:5000/director/${dataId}`);
+      setData(res.data);
+      if (res.data.permissao === 'Recusar') router.push('/login/director/login');
+    } catch (err) {
+      console.log(err);
+      router.push('/login/director/login');
     }
+  };
+
+  return (
+    <div>
+      <Head>
+        <title>Director | Definicoes</title>
+        <link rel="icon" type="image/png" href="../public/images/chat.png" />
+      </Head>
+
+      <NavBarCoordenacao />
+
+      <div className={styleGeral.container}>
+        <SideBarCoordenacao />
+        <div className={styleGeral.content}>
+          <div className="w-100 p-2 mt-5">
+
+            <div className="card mb-4 mt-5 bg-white m-4">
+              <div className="card-body text-center">
+                <h5 className="my-3">{data.nome}</h5>
+                <div className="d-flex justify-content-center mb-2"></div>
+              </div>
+            </div>
+
+            <div className="card mb-4 m-4">
+              <div className="card-body bg-white">
+                {["Nome", "Email", "Bilhete de Identidade", "Telefone", "Sexo"].map((label, idx) => (
+                  <div key={idx} className="row mb-2">
+                    <div className="col-sm-3"><p className="mb-0">{label}</p></div>
+                    <div className="col-sm-9">
+                      <p className="text-muted mb-0">
+                        {label === "Nome" ? data.nome :
+                         label === "Email" ? data.email :
+                         label === "Bilhete de Identidade" ? data.bi :
+                         label === "Telefone" ? data.telefone :
+                         label === "Sexo" ? data.sexo : ""}
+                      </p>
+                    </div>
+                    {idx < 4 && <hr />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card mb-5 m-4" style={{ borderRadius: '15px' }}>
+              <div className="card-body p-4">
+                <h3 className="mb-3">Senha</h3>
+                <p className="small mb-0"><i className="far fa-star fa-lg"></i> <span className="mx-2">{data.senha}</span></p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-outline-danger m-4"
+              onClick={() => {
+                const iddirector = localStorage.getItem('iddirector');
+                setId(iddirector);
+                setModal2(true);
+              }}
+            >
+              Eliminar conta
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-outline-primary m-2"
+              onClick={() => setModal(true)}
+            >
+              Editar dados
+            </button>
+
+            <ModalSetting show={modal} closed={() => setModal(false)} />
+            <ModalAlert show={modal2} closed={() => setModal2(false)} id={id} route="director" />
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
-export default Settings
+
+export default Settings;

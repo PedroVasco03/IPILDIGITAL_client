@@ -2,7 +2,7 @@ import React from "react";
 // import { useForm } from "react-hook-form";
 // import { yupResolver } from '@hookform/resolvers/yup';
 // import * as yup from "yup";
-import { validateName } from "./utils/regex";
+import { validateName } from "../../../utils/regex";
 import style from "../../css/Login.module.css"
 
 function deteta (e){

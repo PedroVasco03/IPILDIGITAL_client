@@ -1,6 +1,6 @@
 import React from "react";
 import style from "../../css/Login.module.css"
-import { validateBi } from "./utils/regex"; 
+import { validateBi } from "../../../utils/regex"; 
 
 function BiBox(){
     const [numbi, setNumBi] = React.useState('');

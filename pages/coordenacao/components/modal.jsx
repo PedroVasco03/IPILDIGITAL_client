@@ -1,153 +1,195 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { Button, Form, FormGroup, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap"
-const listDay = []
-const data = []
-function ModalComponent({show, closed}){
-    const [inicio, setInicio] = useState('7:00')
-    const [fim, setFim] = useState('7:00')
-    const [limite, setLimit] = useState(0)
-    const [item, setItem] = useState({})
-    const [datas, setDatas] = useState([])
-    useEffect(()=>{
-        getUsers()
-     },[])
-     
-     const getUsers = async ()=>{
-         const response = await axios.get('http://localhost:5000/horario-coordenacao')
-         .then((response)=>{
-             console.log('buscando dados no banco de dados')
-             setDatas(response.data)
-         })
-         .catch(()=>console.log('erro: solicitação negada'))
-         
-         
-     }
-     
-   const saveData = async (e)=>{
-        e.preventDefault()
-        try{
-            if(limite > 0){
-                if(listDay.length!=0){  
-                        const horaInicio = inicio.split(":")
-                        const horaFim = fim.split(":")
-                        if(Number.parseInt(horaInicio[0])< Number.parseInt(horaFim[0])){
-                            const id = localStorage.getItem('idcoordenador')
-                                const search = datas.filter((data)=> data.idcoordenador === id)
-                                await axios.get('http://localhost:5000/reclamacao')
-                                .then((response)=>{
-                                    const dado = response.data.filter((data)=>data.para ==='Coordenação')
-                                    response.data.map(async(item)=>{
-                                        if(item.idlocal === id){
-                                            await axios.delete(`http://localhost:5000/reclamacao/${item.id}`)
-                                        }
-                                    })
-                                })
-                            
-                            search.map(async (item)=>{
-                                await axios.delete(`http://localhost:5000/horario-coordenacao/${item.id}`)
-                            })
-                            function compararDiasDaSemana(dia1, dia2) {
-                                var ordem = ["segunda", "terça", "quarta", "quinta", "sexta"];
-                                return ordem.indexOf(dia1) - ordem.indexOf(dia2);
-                            }
-                            const newList = listDay.sort(compararDiasDaSemana)
-                            
-                            newList.map(async (diasemana)=>{
-                                await axios.post('http://localhost:5000/horario-coordenacao',{
-                                idcoordenador: id,
-                                diasemana: diasemana,
-                                inicio: inicio,
-                                fim: fim,
-                                limite: limite
-                            })
-                        
-                        
-                        })
-                        }
-                    }
-            
-                    }else{
-                alert('deve ter pelo menos o limite de uma pessoa')
-            }
-            
-        }catch(error){
-            console.log(error)
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const listDay = [];
+
+function ModalComponent({ show, closed }) {
+    const [inicio, setInicio] = useState("7:00");
+    const [fim, setFim] = useState("7:00");
+    const [limite, setLimit] = useState(0);
+    const [datas, setDatas] = useState([]);
+    const [check, setCheck] = useState(new Array(5).fill(false));
+
+    const diaSemana = ["segunda", "terça", "quarta", "quinta", "sexta"];
+    const hora = [
+        "7:00","7:30","8:00","8:30","9:00","9:30",
+        "10:00","10:30","11:00","11:30","12:00","12:30",
+        "13:00","13:30","14:00","14:30","15:00"
+    ];
+
+    useEffect(() => {
+        getUsers();
+    }, []);
+
+    const getUsers = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/horario-coordenacao");
+            console.log("buscando dados no banco de dados");
+            setDatas(response.data);
+        } catch (err) {
+            console.log("erro: solicitação negada");
         }
-        localStorage.setItem('status-bar', listDay)
-        
-        window.location.reload()
-    }
-    const diaSemana = ['segunda','terça','quarta','quinta','sexta']
-    const [check, setCheck] =useState(
-        new Array(diaSemana.length).fill(false)
-    )
-    
-    const setDay = (item, index)=>{
-        if(!check[index]){
-            listDay.push(item)  
+    };
+
+    const handleOnChange = (position) => {
+        const updateCheck = check.map((item, index) =>
+            position === index ? !item : item
+        );
+        setCheck(updateCheck);
+        setDay(diaSemana[position], position);
+    };
+
+    const setDay = (item, index) => {
+        if (!check[index]) {
+            listDay.push(item);
+        } else {
+            const number = listDay.indexOf(item);
+            listDay.splice(number, 1);
         }
-        else{
-            const number = listDay.indexOf(item)
-            listDay.splice(number, 1)
-            
+    };
+
+    const saveData = async (e) => {
+        e.preventDefault();
+        try {
+            if (limite <= 0) {
+                alert("Deve ter pelo menos o limite de uma pessoa");
+                return;
+            }
+
+            if (listDay.length === 0) return;
+
+            const horaInicio = inicio.split(":");
+            const horaFim = fim.split(":");
+
+            if (Number(horaInicio[0]) >= Number(horaFim[0])) {
+                alert("A hora de início deve ser menor que a hora de fim");
+                return;
+            }
+
+            const id = localStorage.getItem("idcoordenador");
+
+            // Deletar horários e reclamações existentes
+            const search = datas.filter((data) => data.idcoordenador === id);
+            await Promise.all(
+                search.map((item) =>
+                    axios.delete(`http://localhost:5000/horario-coordenacao/${item.id}`)
+                )
+            );
+
+            const reclamacoes = await axios.get("http://localhost:5000/reclamacao");
+            await Promise.all(
+                reclamacoes.data
+                    .filter((r) => r.idlocal === id)
+                    .map((r) => axios.delete(`http://localhost:5000/reclamacao/${r.id}`))
+            );
+
+            // Criar novos horários
+            function compararDiasDaSemana(dia1, dia2) {
+                const ordem = ["segunda", "terça", "quarta", "quinta", "sexta"];
+                return ordem.indexOf(dia1) - ordem.indexOf(dia2);
+            }
+
+            const newList = listDay.sort(compararDiasDaSemana);
+
+            await Promise.all(
+                newList.map((diasemana) =>
+                    axios.post("http://localhost:5000/horario-coordenacao", {
+                        idcoordenador: id,
+                        diasemana,
+                        inicio,
+                        fim,
+                        limite,
+                    })
+                )
+            );
+
+            localStorage.setItem("status-bar", listDay);
+            window.location.reload();
+        } catch (error) {
+            console.log(error);
         }
-    }
-    const handleOnChange = (position)=>{
-        const updateCheck = check.map((item, index)=>{
-            if(position === index){
-                return !item
-            }
-            else{
-                return item
-            }
-        })
-        setCheck(updateCheck)
-        console.log(updateCheck)
-    }
-    const hora = ['7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00']
-    return(
-        <div>
-            <Modal isOpen={show} onClosed={closed}>
-                <ModalHeader toggle={closed}>
-                    <h2>Horário de Atendimento</h2>
-                </ModalHeader>
-                <Form onSubmit={saveData}>
-                <ModalBody>
-                    <Label>Dia de atendimento:</Label>
-                    {diaSemana.map((item, index)=>{
-                        return(
-                            <FormGroup key={index}>
-                                <Label className="mx-1">{item}</Label> 
-                                <Input id="diasemana" name="diasemana" value={index + 1} checked={check[index]} onChange={()=>handleOnChange(index)} onClick={()=>{setDay(item, index)}} type="checkbox" className="mx-1"></Input> 
-                            </FormGroup>
-                        )
-                    })}
-                    <Label for="hora-inicio">Hora de atendimento início:</Label>
-                    <Input id="hora-inicio" type="select" name="hora-inicio" value={inicio} onChange={(e)=>setInicio(e.target.value)}>
-                    {hora.map((item, index)=>{
-                        return(
-                            <option key={index + 1} value={item}>{item}</option>
-                        )
-                    })}
-                    </Input>
-                    <Label for="hora-fim">Hora de atendimento fim:</Label>
-                    <Input id="hora-fim" type="select" name="hora-fim" value={fim} onChange={(e)=>setFim(e.target.value)}>
-                    {hora.map((item, index)=>{
-                        return(
-                            <option key={index} value={item} onChange={()=>setFim(item)}>{item}</option>
-                        )
-                    })}
-                    </Input>
-                   <Label for="limite">Limite de Pessoas:</Label>
-                   <Input id="limite" value={limite} onChange={(e)=>setLimit(e.target.value)} type="number" name="limite"/>
-                </ModalBody>
-                <ModalFooter>
-                    <Button type="submit" color='primary'>Criar</Button>
-                </ModalFooter>
-            </Form>
-            </Modal>
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+            <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Horário de Atendimento</h5>
+                        <button type="button" className="btn-close" onClick={closed}></button>
+                    </div>
+                    <form onSubmit={saveData}>
+                        <div className="modal-body">
+                            <label className="form-label">Dia de atendimento:</label>
+                            {diaSemana.map((item, index) => (
+                                <div className="form-check" key={index}>
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id={`dia-${index}`}
+                                        checked={check[index]}
+                                        onChange={() => handleOnChange(index)}
+                                    />
+                                    <label className="form-check-label" htmlFor={`dia-${index}`}>
+                                        {item}
+                                    </label>
+                                </div>
+                            ))}
+
+                            <label htmlFor="hora-inicio" className="form-label mt-3">
+                                Hora de atendimento início:
+                            </label>
+                            <select
+                                id="hora-inicio"
+                                className="form-select"
+                                value={inicio}
+                                onChange={(e) => setInicio(e.target.value)}
+                            >
+                                {hora.map((item, index) => (
+                                    <option key={index} value={item}>{item}</option>
+                                ))}
+                            </select>
+
+                            <label htmlFor="hora-fim" className="form-label mt-3">
+                                Hora de atendimento fim:
+                            </label>
+                            <select
+                                id="hora-fim"
+                                className="form-select"
+                                value={fim}
+                                onChange={(e) => setFim(e.target.value)}
+                            >
+                                {hora.map((item, index) => (
+                                    <option key={index} value={item}>{item}</option>
+                                ))}
+                            </select>
+
+                            <label htmlFor="limite" className="form-label mt-3">
+                                Limite de Pessoas:
+                            </label>
+                            <input
+                                type="number"
+                                id="limite"
+                                className="form-control"
+                                value={limite}
+                                onChange={(e) => setLimit(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-footer">
+                            <button type="submit" className="btn btn-primary">
+                                Criar
+                            </button>
+                            <button type="button" className="btn btn-secondary" onClick={closed}>
+                                Fechar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
-export default ModalComponent
+
+export default ModalComponent;

@@ -1,5 +1,5 @@
 import React from "react";
-import { validateTelefone } from "./utils/regex";
+import { validateTelefone } from "../../../utils/regex";
 import style from "../../css/Login.module.css"
 
 function deteta (e){ 

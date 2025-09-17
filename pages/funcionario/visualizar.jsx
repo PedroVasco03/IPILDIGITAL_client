@@ -1,185 +1,182 @@
-import Head from "next/head"
-import { Button, Form, FormGroup, Input, Label } from "reactstrap"
-import SideBarAluno from "./sidebar"
-import NavBarAluno from "./navbar"
-import styleGeral from '../css/logado.module.css'
-import { useEffect, useState } from "react"
-import { useRouter } from "next/router"
-import empty from '../../public/images/images-system/empty.png'
-import axios from "axios"
-import Image from "next/image"
-import styleSide from'../css/sideBar.module.css'
-import ModalConfirmation from "./components/modalConfirmation"
-function visualizar() {
-    const router = useRouter()
-    const [datas, setDatas] = useState([])
-    const [pedidos, setPedidos] = useState({})
-    const [modal, setModal] = useState(false)
-    const toggleModal = ()=> setModal(!modal)
-    const modalClose = ()=> setModal(false)
-    const [id, setId] = useState('')
-    useEffect(()=>{
-       setInterval(()=>{
-        getAlunoData()
-       
-       }, 1000)
-    },[])
-    useEffect(()=>{
-        setInterval(()=>{
-            getPedido()
-        }, 1000)
-    },[])
-    const getPedido = async()=>{
-        const nome = localStorage.getItem('view') 
-        
-        await axios.get('http://localhost:5000/pedido')
-        .then((res)=>{            
-            const search = res.data.filter((item)=>item.nome === nome)
-            const obj = {
-                    id: search[0].id,
-                    nome: search[0].nome,
-                    encarregado: search[0].encarregado,
-                    encarregada: search[0].encarregada,
-                    dataNascimento: search[0].dataNascimento,
-                    provincia: search[0].provincia,
-                    bi: search[0].bi,
-                    emitido: search[0].emitido,
-                    dataEmissao:  search[0].dataEmissao,
-                    area: search[0].area,
-                    curso: search[0].curso,
-                    classe: search[0].classe,
-                    turma: search[0].turma,
-                    numero: search[0].numero,
-                    anoLectivo: search[0].anoLectivo,
-                    numeroprocesso: search[0].numeroProcesso,
-                    necessidade: search[0].necessidade,
-                    efeito: search[0].efeito
+import Head from "next/head";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import NavBarAluno from "./navbar";
+import SideBarAluno from "./sidebar";
+import styleGeral from '../css/logado.module.css';
+
+function Visualizar() {
+    const router = useRouter();
+    const [datas, setDatas] = useState({});
+    const [pedidos, setPedidos] = useState({});
+    
+    // Atualiza dados do funcionário e pedido a cada segundo
+    useEffect(() => {
+        const interval = setInterval(() => {
+            getAlunoData();
+            getPedido();
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const getPedido = async () => {
+        const nome = localStorage.getItem('view');
+        try {
+            const res = await fetch('http://localhost:5000/pedido');
+            const data = await res.json();
+            const search = data.find(item => item.nome === nome);
+            if (search) {
+                setPedidos({
+                    id: search.id,
+                    nome: search.nome,
+                    encarregado: search.encarregado,
+                    encarregada: search.encarregada,
+                    dataNascimento: search.dataNascimento,
+                    provincia: search.provincia,
+                    bi: search.bi,
+                    emitido: search.emitido,
+                    dataEmissao: search.dataEmissao,
+                    area: search.area,
+                    curso: search.curso,
+                    classe: search.classe,
+                    turma: search.turma,
+                    numero: search.numero,
+                    anoLectivo: search.anoLectivo,
+                    numeroprocesso: search.numeroProcesso,
+                    necessidade: search.necessidade,
+                    efeito: search.efeito
+                });
+            } else {
+                setPedidos({});
             }
-            setPedidos(obj)
-        }).catch((err)=>{
-            console.log(err)
-        })
-    }
-    const getAlunoData = async ()=>{
-        
-        try{
-            const data = localStorage.getItem('idfuncionario')
-            await axios.get(`http://localhost:5000/funcionario/${data}`)
-            .then((res)=>{
-                 setDatas(res.data)
-                if(res.data.permissao === 'Recusar')
-                    router.push('/login/funcionario/login')
-            }).catch((err)=>{
-                console.log(err)
-                router.push('/login/funcionario/login')
-            })
-            if(data == null){
-                router.push('/login/funcionario/login')
-            }
-        }catch(err){
-            console.log(err)
+        } catch (err) {
+            console.log(err);
         }
-    }
-    return(
+    };
+
+    const getAlunoData = async () => {
+        const data = localStorage.getItem('idfuncionario');
+        if (!data) {
+            router.push('/login/funcionario/login');
+            return;
+        }
+        try {
+            const res = await fetch(`http://localhost:5000/funcionario/${data}`);
+            const json = await res.json();
+            setDatas(json);
+            if (json.permissao === 'Recusar') router.push('/login/funcionario/login');
+        } catch (err) {
+            console.log(err);
+            router.push('/login/funcionario/login');
+        }
+    };
+
+    return (
         <div>
             <Head>
-                <title>Funcionario | Pedido Aluno </title>
+                <title>Funcionario | Pedido Aluno</title>
             </Head>
-            <NavBarAluno/>
-            
+            <NavBarAluno />
             <div className={styleGeral.container}>
-            <SideBarAluno/>
-            <div className={styleGeral.content}>
-                <div className=" d-flex flex-column m-3 mt-5">
-                        <FormGroup className="mt-5">
-                        
-                            <Label>Nome:</Label>
-                            <Input value={pedidos.nome} readOnly/>
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>Filho de:</Label>
-                            <Input value={pedidos.encarregado} readOnly/>
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>e de:</Label> 
-                            <Input value={pedidos.encarregada} readOnly/>
-                        </FormGroup>
-                        <FormGroup className="d-flex flex-wrap">
-                        <FormGroup className="m-2">
-                            <Label>Data de Nascimento:</Label>
-                            <Input type="date" value={pedidos.dataNascimento} readOnly></Input>
-                        </FormGroup>
-                        <FormGroup className="m-2">
-                            <Label>Provincia de: </Label>
-                            <Input value={pedidos.provincia} readOnly></Input>
-                        </FormGroup>
-                        </FormGroup>
-                        <FormGroup className="d-flex flex-wrap ">
-                        <FormGroup className="m-2">
-                            <Label>Portador do BI Nº:</Label>
-                            <Input  value={pedidos.bi} readOnly/>
-                        </FormGroup>
-                        <FormGroup className="m-2">
-                            <Label>Emitido em</Label>
-                            <Input value={pedidos.emitido} readOnly></Input>
-                        </FormGroup>
-                        <FormGroup className="m-2">
-                                <Label>aos:(data de emissão)</Label>
-                                <Input value={pedidos.dataEmissao} type="date" readOnly/>
-                            </FormGroup>
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>Matriculado na Área de Formação: </Label>
-                            <Input value={pedidos.area} readOnly></Input>
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>Curso Especialidade:</Label>
-                            <Input value={pedidos.curso} readOnly></Input>
-                        </FormGroup>
-                        <Label>Dados da Última Frequência:</Label>
-                        <FormGroup className="d-flex flex-wrap">
-                            <FormGroup className="m-2">
-                                <Label>Classe:</Label>
-                                <Input value={pedidos.classe}  readOnly></Input>
-                            </FormGroup>
-                            <FormGroup className="m-2">
-                                <Label>Turma:</Label>
-                                <Input value={pedidos.turma}  readOnly></Input>
-                            </FormGroup>
-                            <FormGroup className="m-2">
-                                <Label>Nº:</Label>
-                                <Input value={pedidos.numero} type="number" readOnly/>
-                            </FormGroup>
-                            <FormGroup className="m-2">
-                                <Label>Ano Lectivo:</Label>
-                                <Input value={pedidos.anoLectivo}  type="number" readOnly></Input>
-                            </FormGroup>
-                        </FormGroup>
-                        
-                        <FormGroup>
-                            <Label>Número de Processo:</Label>
-                            <Input  value={pedidos.numeroprocesso} type="number" readOnly></Input>
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>Necessitando de</Label>
-                            <Input value={pedidos.necessidade} readOnly>
-                            </Input>
-                        </FormGroup>
-                        <FormGroup>
-                            <Label>Efeitos ou por motivos de:</Label>
-                            <Input value={pedidos.efeito} readOnly></Input>
-                        </FormGroup>
-                    
-                    </div>  
-            <div>
-                <Button color="outline-primary" className="mx-3 mb-2" type="submit" onClick={()=>{router.push('/funcionario/solicitacao')}}>Voltar</Button>
-              
-            </div>
-            </div>
+                <SideBarAluno />
+                <div className={styleGeral.content + " mt-5"}>
+                    <div className="container py-3">
+                        <h3 className="mb-4">Detalhes do Pedido</h3>
+
+                        <div className="mb-3">
+                            <label className="form-label">Nome:</label>
+                            <input type="text" className="form-control" value={pedidos.nome || ''} readOnly />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Filho de:</label>
+                            <input type="text" className="form-control" value={pedidos.encarregado || ''} readOnly />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">e de:</label>
+                            <input type="text" className="form-control" value={pedidos.encarregada || ''} readOnly />
+                        </div>
+
+                        <div className="row mb-3">
+                            <div className="col-md-6 mb-3">
+                                <label className="form-label">Data de Nascimento:</label>
+                                <input type="date" className="form-control" value={pedidos.dataNascimento || ''} readOnly />
+                            </div>
+                            <div className="col-md-6 mb-3">
+                                <label className="form-label">Província:</label>
+                                <input type="text" className="form-control" value={pedidos.provincia || ''} readOnly />
+                            </div>
+                        </div>
+
+                        <div className="row mb-3">
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label">Portador do BI Nº:</label>
+                                <input type="text" className="form-control" value={pedidos.bi || ''} readOnly />
+                            </div>
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label">Emitido em:</label>
+                                <input type="text" className="form-control" value={pedidos.emitido || ''} readOnly />
+                            </div>
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label">Data de emissão:</label>
+                                <input type="date" className="form-control" value={pedidos.dataEmissao || ''} readOnly />
+                            </div>
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Área de Formação:</label>
+                            <input type="text" className="form-control" value={pedidos.area || ''} readOnly />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Curso/Especialidade:</label>
+                            <input type="text" className="form-control" value={pedidos.curso || ''} readOnly />
+                        </div>
+
+                        <h5 className="mt-4 mb-3">Última Frequência</h5>
+                        <div className="row mb-3">
+                            <div className="col-md-3 mb-3">
+                                <label className="form-label">Classe:</label>
+                                <input type="text" className="form-control" value={pedidos.classe || ''} readOnly />
+                            </div>
+                            <div className="col-md-3 mb-3">
+                                <label className="form-label">Turma:</label>
+                                <input type="text" className="form-control" value={pedidos.turma || ''} readOnly />
+                            </div>
+                            <div className="col-md-3 mb-3">
+                                <label className="form-label">Nº:</label>
+                                <input type="number" className="form-control" value={pedidos.numero || ''} readOnly />
+                            </div>
+                            <div className="col-md-3 mb-3">
+                                <label className="form-label">Ano Lectivo:</label>
+                                <input type="number" className="form-control" value={pedidos.anoLectivo || ''} readOnly />
+                            </div>
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Número de Processo:</label>
+                            <input type="number" className="form-control" value={pedidos.numeroprocesso || ''} readOnly />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Necessidade:</label>
+                            <input type="text" className="form-control" value={pedidos.necessidade || ''} readOnly />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Efeitos / Motivos:</label>
+                            <input type="text" className="form-control" value={pedidos.efeito || ''} readOnly />
+                        </div>
+
+                        <button className="btn btn-outline-primary mt-3" onClick={() => router.push('/funcionario/solicitacao')}>
+                            Voltar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    )
-    
+    );
 }
 
-export default visualizar
+export default Visualizar;

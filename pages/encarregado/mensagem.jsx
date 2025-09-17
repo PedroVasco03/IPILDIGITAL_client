@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import Image from "next/image"
 import empty from '../../public/images/images-system/empty.png'
-import { Button } from "reactstrap"
 import Head from "next/head"
 import i1 from "../../public/images/logotipo.png" 
 import i2 from "../../public/images/student.jpg"

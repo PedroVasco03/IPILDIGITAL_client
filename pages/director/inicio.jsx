@@ -1,78 +1,76 @@
-import NavBarCoordenacao from "./navbar"
-import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap"
-import axios from "axios"
-import { useCallback, useEffect, useState } from "react"
-import ModalComponent from "./components/modal"
-import Head from "next/head"
-import styleGeral from '../css/logado.module.css'
-import styleSide from'../css/sideBar.module.css'
-import SideBarCoordenacao from "./sidebar"
-import Condition from "./condition"
-import { useRouter } from "next/router"
-import Hero from "../components/hero"
+import NavBarCoordenacao from "./navbar";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import ModalComponent from "./components/modal";
+import Head from "next/head";
+import styleGeral from '../css/logado.module.css';
+import styleSide from'../css/sideBar.module.css';
+import SideBarCoordenacao from "./sidebar";
+import Condition from "./condition";
+import { useRouter } from "next/router";
+import Hero from "../components/hero";
 
-function Home(){
-    const [dado, setDado] = useState({})
-    const [datas, setDatas] = useState([])
-    const [modal, setModal] = useState(false)
-    const toggleModal = ()=> setModal(!modal)
-    const modalClose = ()=> setModal(false)
-    const [modal2, setModal2] = useState(false)
-    const toggleModal2 = ()=> setModal2(!modal2)
-    const modalClose2 = ()=> setModal2(false)
-    const [dropdownOpen, setDropdownOpen] = useState(false)
-    const toggle = ()=> setDropdownOpen((prevState)=>!prevState)
-    const [data, setData] = useState({})
-    const router = useRouter()
-    useEffect(()=>{
-        setInterval(()=>{
-            getAlunoData()
-        }, 1000)
-     },[])
-     const getAlunoData = async ()=>{
-         try{
-             const data = localStorage.getItem('iddirector')
-             await axios.get(`http://localhost:5000/director/${data}`)
-             .then((res)=>{
-                 
-                 if(res.data.permissao === 'Recusar')
-                    router.push('/login/director/login')
-             }).catch((err)=>{
-                router.push('/login/director/login')
-                 console.log(err)
-             })
-             if(data == null)
-                 router.push('/login/director/login')
-         }catch(err){
-             console.log(err)
-         }
-     }
-     
-    return <div>
-        <Head>
-            <title>SECRETARIA | Inicio</title>
-            <link rel="icon" type="png/ico" href="../public/images/chat.png"/>
-        </Head>    
-        <NavBarCoordenacao></NavBarCoordenacao>
-        <div className={styleGeral.container}>
-            <SideBarCoordenacao></SideBarCoordenacao>
-            
-            <div className={styleGeral.content}> 
-                    <Hero />         
-                    <div>
-                        <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                            <DropdownToggle className={styleSide.btn}>Horário de Atendimento</DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem onClick={toggleModal}>Criar Horário</DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-                       <ModalComponent show={modal} closed={modalClose}/>
+function Home() {
+    const [modal, setModal] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const interval = setInterval(getAlunoData, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const getAlunoData = async () => {
+        try {
+            const dataId = localStorage.getItem('iddirector');
+            if (!dataId) return router.push('/login/director/login');
+            const res = await axios.get(`http://localhost:5000/director/${dataId}`);
+            if (res.data.permissao === 'Recusar') router.push('/login/director/login');
+        } catch (err) {
+            console.log(err);
+            router.push('/login/director/login');
+        }
+    };
+
+    return (
+        <div>
+            <Head>
+                <title>SECRETARIA | Inicio</title>
+                <link rel="icon" type="image/png" href="../public/images/chat.png" />
+            </Head>
+
+            <NavBarCoordenacao />
+
+            <div className={styleGeral.container}>
+                <SideBarCoordenacao />
+
+                <div className={styleGeral.content}>
+                    <Hero />
+
+                    {/* Dropdown usando Bootstrap puro */}
+                    <div className="dropdown m-3">
+                        <button 
+                            className="btn btn-secondary dropdown-toggle"
+                            type="button"
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                        >
+                            Horário de Atendimento
+                        </button>
+                        <ul className={`dropdown-menu ${dropdownOpen ? 'show' : ''}`}>
+                            <li>
+                                <button className="dropdown-item" onClick={() => setModal(true)}>
+                                    Criar Horário
+                                </button>
+                            </li>
+                        </ul>
                     </div>
-                    <Condition></Condition>  
-                   
-                     
+
+                    <ModalComponent show={modal} closed={() => setModal(false)} />
+                    <Condition />
                 </div>
             </div>
-        </div>;
+        </div>
+    );
 }
-export default Home
+
+export default Home;

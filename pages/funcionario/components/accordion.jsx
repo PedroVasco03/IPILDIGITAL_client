@@ -1,24 +1,32 @@
-import { useState } from "react"
-import { Accordion, AccordionHeader, AccordionBody,AccordionItem, Card, CardBody, CardFooter, Button } from "reactstrap"
-function AccordionComponent({children,title}){
-    const [open, setOpen] = useState('1')
-    const toggle = (id)=>{
-        if(open == id){
-            setOpen()
-        }
-        else{
-            setOpen(id)
-        }
-    }
-    return(
-        <div>
-             <Accordion className="w-100" open={open} toggle={toggle}>
-                <AccordionItem>
-                    <AccordionHeader targetId="1">{title}</AccordionHeader>
+import { useState } from "react";
+
+function AccordionComponent({ children, title }) {
+    const [open, setOpen] = useState(true);
+
+    const toggle = () => {
+        setOpen(!open);
+    };
+
+    return (
+        <div className="accordion w-100">
+            <div className="accordion-item">
+                <h2 className="accordion-header">
+                    <button
+                        className={`accordion-button ${!open ? 'collapsed' : ''}`}
+                        type="button"
+                        onClick={toggle}
+                    >
+                        {title}
+                    </button>
+                </h2>
+                <div className={`accordion-collapse collapse ${open ? 'show' : ''}`}>
+                    <div className="accordion-body">
                         {children}
-                </AccordionItem>
-            </Accordion>
+                    </div>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
-export default AccordionComponent
+
+export default AccordionComponent;

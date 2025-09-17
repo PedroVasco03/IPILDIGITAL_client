@@ -1,421 +1,174 @@
-import style from "../../../css/Login.module.css"
-import { validateName, validateEmail, validateTelefone, validateBi, validatePassword} from "../../components/utils/regex";
-import React from "react";
-import { useEffect } from "react";
+import style from "../../../css/Login.module.css";
+import { validateName, validateEmail, validateTelefone, validateBi, validatePassword } from "../../../../utils/regex";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Input } from "reactstrap";
-import { useState } from "react";
-import Link from 'next/link'
-import Image from "next/image";
-import imgbtn from '../../images/next_page_50px.png'
-import imgbtnB  from '../../images/back_page_50px.png'
-import imgbtnCANCEL from '../../images/cancel_50px.png'
-let allData = []
-function Director(){ 
-    useEffect(()=>{
-        getUsers()
-    },[])
-    const getUsers = async ()=>{
-        allData = []
-        await axios.get('http://localhost:5000/aluno')
-        .then((response)=>{
-            response.data.map((data)=>{
-                allData.push(data)
-            })
-            
-        })
-        .catch(()=>console.log('erro: solicitação negada'))
-        await axios.get('http://localhost:5000/coordenador')
-        .then((response)=>{
-            response.data.map((data)=>{
-                allData.push(data)
-            })
-        })
-        .catch(()=>console.log('erro: solicitação negada'))
-    
-        await axios.get('http://localhost:5000/director')
-        .then((response)=>{
-            response.data.map((data)=>{
-                allData.push(data)
-            })
-        })
-        .catch(()=>console.log('erro: solicitação negada'))
-        await axios.get('http://localhost:5000/encarregado')
-        .then((response)=>{
-            response.data.map((data)=>{
-                allData.push(data)
-            })
-        })
-        .catch(()=>console.log('erro: solicitação negada'))
-        
-        await axios.get('http://localhost:5000/funcionario')
-        .then((response)=>{
-            response.data.map((data)=>{
-                allData.push(data)
-            })
-        })
-        .catch(()=>console.log('erro: solicitação negada'))
-        console.log(allData)
-    }
-function handleChangue({target}){
-    setSexo(target.value);
-}
 
-function deteta (e){
-    const Code = (e.charCode ? e.charCode : e.wich);
-    if(Code > 40 && Code <=62){
-        e.preventDefault()
-    }
-}
-function detetaNum (e){ 
-    const Code = (e.charCode ? e.charCode : e.wich);
-    if(Code < 40 || Code > 58){
-        e.preventDefault()
-    }
-}
-const validate = () => {
-    if(!validateName.test(nome)){
-        setNomeErr(true)
-        setDesabilitado(true)
-    }else{
-        setNomeErr(false)
-        setDesabilitado(false)
-    }
-    if(!validateEmail.test(email)){
-        setEmailErr(true)
-        setDesabilitado(true)
-    }else{
-        setEmailErr(false) 
-        setDesabilitado(false)
-    }
-    if(!validateTelefone.test(telefone)){
-        setTelefoneErr(true)
-        setDesabilitado(true)
-    }else{
-        setTelefoneErr(false)
-        setDesabilitado(false)
-    }
-    if(!validateBi.test(numbi)){
-        setBiErr(true)
-        setDesabilitado(true)
-    }else{
-        setBiErr(false)
-        setDesabilitado(false)
-    }
-    if(!validatePassword.test(senha)){
-        setSenhaErr(true)
-        setDesabilitado(true)
-    }else{
-        setSenhaErr(false)
-        setDesabilitado(false)
-    }
-}
-function detetaPro (e){
-    const Code = (e.key ? e.key : e.key);
-    console.log(Code)
-    if( Code !== '0' & 
-        Code !== '1' & 
-        Code !== '2' & 
-        Code !== '3' & 
-        Code !== '4' & 
-        Code !== '5' & 
-        Code !== '6' & 
-        Code !== '7' & 
-        Code !== '8' & 
-        Code !== '9'){
-        e.preventDefault()
-    }
-}
-    const saverUser = async ()=>{
-        if(nome!="" && telefone!="" && email!="" && sexo!="" && senha!=""){
-            if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                if(fetchData.length == 0){
-                    alert('salvo com sucesso director')
-                    await axios.post('http://localhost:5000/director',{
-                        nome: nome,
-                        telefone: telefone,
-                        email: email,
-                        bi: numbi,
-                        sexo: sexo,
-                        senha: senha,
-                        tipo:'director'
-                    },{ method: 'post', 
-                    baseURL:'http://localhost:5000/director', 
-                    timeout:1000, 
-                    withCredentials: false, 
-                    auth: {
-                        username: nome,
-                        password: senha,
-                    },
-                    responseType:'json',
-                    responseEncoding:'utf8'
-                })
-               
-                }
-                else{
-                    alert('Dados digitados já existem')
-                }
-                
-                
-            }
-            else{
-                alert('dados inválidos!')
-            }
-        }
-        
-    }
-    const [desabilitado, setDesabilitado] = React.useState(false)
-    const [nome, setNome] = React.useState('');
-    const [nomeErr, setNomeErr] = React.useState('');
-    const [email, setEmail] = React.useState('');
-    const [emailErr, setEmailErr] = React.useState(false);
-    const [telefone, setTelefone] = React.useState('');
-    const [telefoneErr, setTelefoneErr] = React.useState('');
-    const [numbi, setNumBi] = React.useState('');
-    const [biErr, setBiErr] = React.useState('');
-    const [senha, setSenha] = React.useState('');
-    const [senhaErr, setSenhaErr] = React.useState(false);
-    const [sexo, setSexo] = React.useState('masculino');
-    const [area, setArea] = React.useState('');
-    const [css, setCss] = React.useState(null)
-    const [next, setNext] = useState('')
-    const [error, setError] = useState('')
-    const [type, setType]= React.useState('Password')
-    const [btnOn, setBtn]=React.useState('Login_esconde__V2IYL')
+function Director() {
+  const [allData, setAllData] = useState([]);
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    numbi: "",
+    senha: "",
+    sexo: "masculino",
+  });
+  const [errors, setErrors] = useState({});
+  const [showPass, setShowPass] = useState(false);
 
-    const showPassword = () => {
-        if(type==='Text'){
-            setType('Password')
-            setBtn('Login_esconde__V2IYL')
-        }
-        else{
-        setType('Text')
-        setBtn('')
-        }
-    }
-    function ss(){
-        if(css===null) 
-            setCss('Login_next3__EuJqb')
-    }
-    function rs(){
-        if('Login_next3__EuJqb')
-            setCss(null)
-    }
-    return <>
-    <form method="post" className={style.sign_up_form+" "+ style.form +" "+ css} onSubmit={saverUser}>
-        <h2 className={style.title+" "+ style.h2}>Cadastrar-se</h2>
-        <div className={style.original}>
-            <div className={style.input_field+" " +style.div}>
-            <i className={"bi-person-fill "+style.i}></i>
-            <input
-                type="text"
-                name="usernew"
-                placeholder="Nome"
-                className={style.input}
-                value={nome}
-                id="nome"
-                onKeyPress={deteta}
-                onChange={
-                    (event) => {
-                    const nome = event.target.value
-                    setNome (event.target.value)
-                    setNomeErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setNext('')
-                            setError('Dados digitados já existem')
-                        }
+  useEffect(() => {
+    const getUsers = async () => {
+      try {
+        const endpoints = ['aluno','coordenador','director','encarregado','funcionario'];
+        const results = await Promise.all(endpoints.map(ep => axios.get(`http://localhost:5000/${ep}`)));
+        const mergedData = results.flatMap(res => res.data);
+        setAllData(mergedData);
+      } catch (err) {
+        console.log('Erro ao buscar usuários:', err);
+      }
+    };
+    getUsers();
+  }, []);
 
-                    }
-                    else{
-                        setNext('')
-                    }
-                }
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: false }));
+  };
 
-                }
-            onBlur={validate}
-            required={true}
-            />
+  const validateForm = () => {
+    const newErrors = {};
+    if (!validateName.test(form.nome)) newErrors.nome = true;
+    if (!validateEmail.test(form.email)) newErrors.email = true;
+    if (!validateTelefone.test(form.telefone)) newErrors.telefone = true;
+    if (!validateBi.test(form.numbi)) newErrors.numbi = true;
+    if (!validatePassword.test(form.senha)) newErrors.senha = true;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const saverUser = async e => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const duplicate = allData.find(
+      u => u.nome === form.nome || u.email === form.email || u.telefone === form.telefone || u.bi === form.numbi
+    );
+
+    if (duplicate) {
+      alert("Dados digitados já existem");
+      return;
+    }
+
+    try {
+      await axios.post("http://localhost:5000/director", { ...form, tipo: "director" });
+      alert("Salvo com sucesso director");
+      setForm({ nome:"", email:"", telefone:"", numbi:"", senha:"", sexo:"masculino" });
+    } catch (err) {
+      console.log("Erro ao salvar diretor:", err);
+    }
+  };
+
+  return (
+    <form className={`${style.sign_up_form} ${style.form}`} onSubmit={saverUser}>
+      <h2 className={style.title}>Cadastrar-se</h2>
+
+      <div className="mb-3">
+        <label className="form-label">Nome</label>
+        <input
+          type="text"
+          name="nome"
+          className={`form-control ${errors.nome ? 'is-invalid' : ''}`}
+          value={form.nome}
+          onChange={handleChange}
+        />
+        {errors.nome && <div className="invalid-feedback">Nome inválido</div>}
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Email</label>
+        <input
+          type="text"
+          name="email"
+          className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+          value={form.email}
+          onChange={handleChange}
+        />
+        {errors.email && <div className="invalid-feedback">Email inválido</div>}
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Telefone</label>
+        <input
+          type="text"
+          name="telefone"
+          className={`form-control ${errors.telefone ? 'is-invalid' : ''}`}
+          value={form.telefone}
+          onChange={handleChange}
+        />
+        {errors.telefone && <div className="invalid-feedback">Telefone inválido</div>}
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Bilhete de Identidade</label>
+        <input
+          type="text"
+          name="numbi"
+          className={`form-control ${errors.numbi ? 'is-invalid' : ''}`}
+          value={form.numbi}
+          onChange={handleChange}
+        />
+        {errors.numbi && <div className="invalid-feedback">BI inválido</div>}
+      </div>
+
+      <div className="mb-3 position-relative">
+        <label className="form-label">Senha</label>
+        <input
+          type={showPass ? "text" : "password"}
+          name="senha"
+          className={`form-control ${errors.senha ? 'is-invalid' : ''}`}
+          value={form.senha}
+          onChange={handleChange}
+        />
+        <span
+          className="position-absolute top-50 end-0 translate-middle-y pe-3"
+          style={{cursor:'pointer'}}
+          onClick={() => setShowPass(prev => !prev)}
+        >
+          {showPass ? "🙈" : "👁️"}
+        </span>
+        {errors.senha && <div className="invalid-feedback">Senha inválida</div>}
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label me-3">Sexo:</label>
+        <div className="form-check form-check-inline">
+          <input
+            type="radio"
+            name="sexo"
+            value="masculino"
+            className="form-check-input"
+            checked={form.sexo === "masculino"}
+            onChange={handleChange}
+          />
+          <label className="form-check-label">Masculino</label>
         </div>
-        {nomeErr && <small className={style.error}>Por favor digite nome válido</small>}
-
-        <div className={style.input_field + " " +style.div}>
-            <i className={"bi-envelope-fill"+" "+ style.i}></i>
-            <input
-                type="text"
-                name="email"
-                placeholder="Email"
-                className={style.input}
-                value={email}
-                onChange={(event) =>{
-                    const mail = event.target.value
-                    setEmail(event.target.value)
-                    setEmailErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(mail) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-
-                        }
-                        else{
-                            setNext('')
-                            setError('Dados digitados já existem')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                }}
-                onBlur={validate}
-                required={true}
-            />
+        <div className="form-check form-check-inline">
+          <input
+            type="radio"
+            name="sexo"
+            value="feminino"
+            className="form-check-input"
+            checked={form.sexo === "feminino"}
+            onChange={handleChange}
+          />
+          <label className="form-check-label">Feminino</label>
         </div>
-        {emailErr && <small className={style.error}>Por favor  digite um email válido</small>}
+      </div>
 
-        <div className={style.input_field+" " +style.div}>
-            <i className={"bi-phone-fill "+style.i}></i>
-            <input
-                type="text"
-                name="mailnew"
-                placeholder="Telefone"
-                className={style.input}
-                maxLength={11}
-                minLength={9}
-                value={telefone}
-                onKeyPress={detetaNum}
-                onChange={
-                    (event) => {
-                    const cellphone = event.target.value
-                    setTelefone (event.target.value)
-                    setTelefoneErr(false)
-                    setDesabilitado(false)
-
-                    if(validateName.test(nome) && validateTelefone.test(cellphone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setError('Dados digitados já existem')
-                            setNext('')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                    }
-                }
-                onBlur={validate}
-                required={true}
-            />
-        </div>
-        {telefoneErr && <small className={style.error}>Por favor digite número válido EX: '<b>999-999-999</b>' </small>}
-        <div className={style.NextPrev}>
-            <Image src={imgbtn} className={style.next+" "+style.imgbtn} onClick={ss}/>
-        </div>
-    </div>
-    <div className={style.prosseguir3}>
-        <div className={style.input_field +" "+style.div}>
-            <i className={"bi-card-heading "+ style.i}></i>
-            <input
-                type="text"
-                name="binew"
-                className={style.input}
-                placeholder="Bilhete de identidade"
-                maxLength={14}
-                value={numbi}
-                onChange={
-                    (event) => {
-                    const bi = event.target.value
-                    setNumBi (event.target.value)
-                    setBiErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(bi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setError('Dados digitados já existem')
-                            setNext('')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                }
-                }
-                onBlur={validate}
-                required={true}
-                />
-            </div>
-            {biErr && <small className={style.error}>Por favor digite numero do bilhete válido</small>}
-            <div className={style.input_field +" "+style.div}>
-                <i className={"bi-lock-fill "+style.i}></i>
-                <input 
-                    type={type}
-                    name="password" 
-                    placeholder="Senha"
-                    className={style.input}
-                    value={senha}
-                    onChange={
-                        (event) => {
-                        setNext('')
-                        setSenha (event.target.value)
-                        setSenhaErr(false)
-                        setDesabilitado(false)}
-                    } 
-                    onBlur={validate}
-                    required={true}
-                />
-                <i className={style.olhos+ " bi-eye-fill "+style.i} onClick={showPassword}></i>
-                <i className={style.olhos+ " bi-eye-slash-fill "+style.i+" "+btnOn} onClick={showPassword}></i>
-            </div>
-            {senhaErr && <small className={style.error}>Pelo menos 6 digitos incluindo letras e numeros
-                        </small>}
-
-                <div className="gender-field div"  onChange={(event) => setSexo (event.target.value)}>
-                    <p>Sexo</p>
-                    <div className="radio-field div" >
-                        <label htmlFor="masculino" >Masculino</label>
-                        <Input
-                            type="radio"
-                            value="masculino"
-                            id="masculino"
-                            className="input mx-1"
-                            checked={sexo === 'masculino'}
-                            onChange={handleChangue}
-                        />
-                        <label className="mx-2" htmlFor="feminino">Feminino</label>
-                        <Input
-                            type="radio"
-                            id="feminino"
-                            value="feminino"
-                            className="input mx-1"
-                            checked={sexo==='feminino'}
-                            onChange={handleChangue}
-                        />
-                    </div>
-                </div>
-            <Button type="submit">
-                Cadastrar
-            </Button>
-            <div className={style.NextPrev}>
-            <Image src={imgbtnCANCEL} className={style.prev +" "+style.imgbtn} onClick={rs} />
-            </div>
-    </div>
+      <button type="submit" className="btn btn-primary w-100">Cadastrar</button>
     </form>
-</>;
+  );
 }
-export default Director
+
+export default Director;

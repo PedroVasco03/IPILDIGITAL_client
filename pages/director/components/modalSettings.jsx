@@ -1,353 +1,196 @@
-import React from "react";
-import { validateBi, validateEmail, validateName, validatePassword, validateTelefone } from "@/pages/login/components/utils/regex";     
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { Button, Form, Input,  Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap"
+import React, { useEffect, useState } from "react";
+import { validateBi, validateEmail, validateName, validatePassword, validateTelefone } from "@/utils/regex";
+import axios from "axios";
 import { useRouter } from "next/router";
-let allData = []
-function  ModalSetting({show, closed}){
-    const [desabilitado, setDesabilitado] = useState(false)
-    const [nome, setNome] = React.useState('');
-    const [nomeErr, setNomeErr] = React.useState('');
-    const [email, setEmail] = React.useState('');
-    const [emailErr, setEmailErr] = React.useState(false);
-    const [telefone, setTelefone] = React.useState('');
-    const [telefoneErr, setTelefoneErr] = React.useState('');
-    const [numbi, setNumBi] = React.useState('');
-    const [biErr, setBiErr] = React.useState('');
-    const [senha, setSenha] = React.useState('');
-    const [senhaErr, setSenhaErr] = React.useState(false);
-    const [sexo, setSexo] = React.useState('masculino');
-    const [check, setCheck] = useState(true)
-    const [next , setNext] = useState('')
-    const [error, setError] = useState('')
-    function handleChangue({target}){
-        setSexo(target.value);
+
+let allData = [];
+
+function ModalSetting({ show, closed }) {
+  const [desabilitado, setDesabilitado] = useState(false);
+  const [nome, setNome] = useState('');
+  const [nomeErr, setNomeErr] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailErr, setEmailErr] = useState(false);
+  const [telefone, setTelefone] = useState('');
+  const [telefoneErr, setTelefoneErr] = useState(false);
+  const [numbi, setNumBi] = useState('');
+  const [biErr, setBiErr] = useState(false);
+  const [senha, setSenha] = useState('');
+  const [senhaErr, setSenhaErr] = useState(false);
+  const [sexo, setSexo] = useState('masculino');
+  const [check, setCheck] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleChangue = (e) => setSexo(e.target.value);
+
+  const deteta = (e) => {
+    const code = e.charCode || e.which;
+    if (code > 40 && code <= 62) e.preventDefault();
+  };
+
+  const detetaNum = (e) => {
+    const code = e.charCode || e.which;
+    if (code < 40 || code > 58) e.preventDefault();
+  };
+
+  const validate = () => {
+    setNomeErr(!validateName.test(nome));
+    setEmailErr(!validateEmail.test(email));
+    setTelefoneErr(!validateTelefone.test(telefone));
+    setBiErr(!validateBi.test(numbi));
+    setSenhaErr(!validatePassword.test(senha));
+    setDesabilitado(
+      !validateName.test(nome) ||
+      !validateEmail.test(email) ||
+      !validateTelefone.test(telefone) ||
+      !validateBi.test(numbi) ||
+      !validatePassword.test(senha)
+    );
+  };
+
+  useEffect(() => {
+    const getData = async () => {
+      const value = localStorage.getItem('iddirector');
+      try {
+        const res = await axios.get(`http://localhost:5000/director/${value}`);
+        setNome(res.data.nome);
+        setEmail(res.data.email);
+        setNumBi(res.data.bi);
+        setTelefone(res.data.telefone);
+        setSenha(res.data.senha);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getData();
+  }, []);
+
+  const save = async () => {
+    alert('Informações actualizadas');
+    const data = localStorage.getItem('iddirector');
+    if (nome && numbi && telefone && email && senha) {
+      await axios.patch(`http://localhost:5000/director/${data}`, {
+        nome, bi: numbi, telefone, email, sexo, senha
+      });
+      window.location.reload();
     }
-    
-    function deteta (e){
-        const Code = (e.charCode ? e.charCode : e.wich);
-        if(Code > 40 && Code <=62){
-            e.preventDefault()
-        }
-    }
-    function detetaNum (e){
-        const Code = (e.charCode ? e.charCode : e.wich);
-        if(Code < 40 || Code > 58){
-            e.preventDefault()
-        }
-    }
-    const validate = () => {
-        if(!validateName.test(nome)){
-            setNomeErr(true)
-            setDesabilitado(true)
-        }else{
-            setNomeErr(false)
-            setDesabilitado(false)
-        }
-        if(!validateEmail.test(email)){
-            setEmailErr(true)
-            setDesabilitado(true)
-        }else{
-            setEmailErr(false)
-            setDesabilitado(false)
-        }
-        if(!validateTelefone.test(telefone)){
-            setTelefoneErr(true)
-            setDesabilitado(true)
-        }else{
-            setTelefoneErr(false)
-            setDesabilitado(false)
-        }
-        if(!validateBi.test(numbi)){
-            setBiErr(true)
-            setDesabilitado(true)
-        }else{
-            setBiErr(false)
-            setDesabilitado(false)
-        }
-        if(!validatePassword.test(senha)){
-            setSenhaErr(true)
-            setDesabilitado(true)
-        }else{
-            setSenhaErr(false)
-            setDesabilitado(false)
-        }
-    }
-    useEffect(()=>{
-        getData()
-    },[])
-    const getData = async ()=>{
-      
-        const value = localStorage.getItem('iddirector')
-        await axios.get(`http://localhost:5000/director/${value}`).then((res)=>{
-            setNome(res.data.nome)
-            setEmail(res.data.email)
-            setNumBi(res.data.bi)
-            setTelefone(res.data.telefone)
-            setSenha(res.data.senha)
-        }).catch((err)=>{
-            console.log(err)
-        })
-    
-        
-    }
-    const router = useRouter()
-    const save = async ()=>{
-          alert('Informações actualizadas')
-        const data = localStorage.getItem('iddirector')
-    if(nome !="" && numbi!="" && telefone !="" && email!="" && senha !=""){
-        await axios.patch(`http://localhost:5000/director/${data}`,{
-            nome: nome,
-            bi: numbi,
-            telefone: telefone,
-            email: email,
-            sexo: sexo,
-            senha:senha                
-        })
-        window.location.reload()
-    }
-    }
-    return(
-        <div>
-            <Modal isOpen={show} onClosed={closed}>
-                <ModalHeader toggle={closed}>
-                    <h2>Editar dados </h2>
-                </ModalHeader>
-                <Form >
-                <ModalBody>
-                <div>
-            <div>
-            <Input
-            readOnly={check}
-            className="m-2"
+  };
+
+  if (!show) return null;
+
+  return (
+    <div className="modal d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+      <div className="modal-dialog modal-dialog-centered modal-lg">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Editar dados</h5>
+            <button type="button" className="btn-close" onClick={closed}></button>
+          </div>
+          <div className="modal-body">
+            <div className="mb-3">
+              <input
                 type="text"
-                name="usernew"
+                className={`form-control mb-2 ${nomeErr ? 'is-invalid' : ''}`}
                 placeholder="Nome"
                 value={nome}
-                id="nome"
-                onKeyPress={deteta}
-                onChange={
-                    (event) => {
-                    const nome = event.target.value
-                    setNome (event.target.value)
-                    setNomeErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setNext('')
-                            setError('Dados digitados já existem')
-                        }
-
-                    }
-                    else{
-                        setNext('')
-                    }
-                }
-
-                }
-            onBlur={validate}
-            required={true}
-            />
-        </div>
-        {nomeErr && <p>Por favor digite nome válido</p>}
-
-        <div>
-           
-            <Input
-                className="m-2"
                 readOnly={check}
+                onKeyPress={deteta}
+                onChange={(e) => setNome(e.target.value)}
+                onBlur={validate}
+              />
+              {nomeErr && <div className="invalid-feedback">Por favor digite nome válido</div>}
+
+              <input
                 type="text"
-                name="email"
+                className={`form-control mb-2 ${emailErr ? 'is-invalid' : ''}`}
                 placeholder="Email"
                 value={email}
-                onChange={(event) =>{
-                    const mail = event.target.value
-                    setEmail(event.target.value)
-                    setEmailErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(mail) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-
-                        }
-                        else{
-                            setNext('')
-                            setError('Dados digitados já existem')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                }}
-                onBlur={validate}
-                required={true}
-            />
-        </div>
-        {emailErr && <small>Por favor  digite um email válido</small>}
-
-        <div>
-            <Input
-                className="m-2"
                 readOnly={check}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={validate}
+              />
+              {emailErr && <div className="invalid-feedback">Por favor digite um email válido</div>}
+
+              <input
                 type="text"
-                name="mailnew"
+                className={`form-control mb-2 ${telefoneErr ? 'is-invalid' : ''}`}
                 placeholder="Telefone"
+                value={telefone}
+                readOnly={check}
                 maxLength={11}
                 minLength={9}
-                value={telefone}
                 onKeyPress={detetaNum}
-                onChange={
-                    (event) => {
-                    const cellphone = event.target.value
-                    setTelefone (event.target.value)
-                    setTelefoneErr(false)
-                    setDesabilitado(false)
-
-                    if(validateName.test(nome) && validateTelefone.test(cellphone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                            setNext('/login/aluno/ProsseguirAluno')
-                        }
-                        else{
-                            setError('Dados digitados já existem')
-                            setNext('')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                    }
-                }
+                onChange={(e) => setTelefone(e.target.value)}
                 onBlur={validate}
-                required={true}
-            />
-        </div>
-        {telefoneErr && <small>Por favor digite número válido EX: "999-999-999"</small>}
-    </div>
-    <div>
-        <div>
-            <Input
-                className="m-2"
-                readOnly={check}
+              />
+              {telefoneErr && <div className="invalid-feedback">Por favor digite número válido EX: "999-999-999"</div>}
+
+              <input
                 type="text"
-                name="binew"
+                className={`form-control mb-2 ${biErr ? 'is-invalid' : ''}`}
                 placeholder="Bilhete de identidade"
-                maxLength={14}
                 value={numbi}
-                onChange={
-                    (event) => {
-                    const bi = event.target.value
-                    setNumBi (event.target.value)
-                    setBiErr(false)
-                    setDesabilitado(false)
-                    if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(bi)&& validatePassword.test(senha)){
-                        const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                        if(fetchData.length == 0){
-                            setError('')
-                        }
-                        else{
-                            setError('Dados digitados já existem')
-                            setNext('')
-                        }
-                    }
-                    else{
-                        setNext('')
-                    }
-                }
-                }
-                onBlur={validate}
-                required={true}
-                />
-            </div>
-            {biErr && <small>Por favor digite numero do bilhete válido</small>}
-            <div>
-               
-                <Input
-                className="m-2"
                 readOnly={check}
-                    type="password"
-                    name="password"
-                    placeholder="Senha"
-                    maxLength={8}
-                    value={senha}
-                    onChange={
-                            (event) => {
-                                const password = event.target.value
-                            setSenha (event.target.value)
-                            setSenhaErr(false)
-                            setDesabilitado(false)
-                            if(validateName.test(nome) && validateTelefone.test(telefone) && validateEmail.test(email) && validateBi.test(numbi)&& validatePassword.test(password)){
-                                const fetchData = allData.filter((data)=> data.nome == nome || data.bi ==numbi || data.email == email || data.telefone == telefone)
-                                if(fetchData.length == 0){
-                                    setError('')
-                                    setNext('/login/aluno/ProsseguirAluno')
-                                }
-                                else{
-                                    setError('Dados digitados já existem')
-                                    setNext('')
-                                }
-                            }
-                            else{
-                                setNext('')
-                            }
-                        }
+                maxLength={14}
+                onChange={(e) => setNumBi(e.target.value)}
+                onBlur={validate}
+              />
+              {biErr && <div className="invalid-feedback">Por favor digite número do bilhete válido</div>}
 
-                    }
-                    onBlur={validate}
-                    required={true}
-                />
+              <input
+                type="password"
+                className={`form-control mb-2 ${senhaErr ? 'is-invalid' : ''}`}
+                placeholder="Senha"
+                value={senha}
+                readOnly={check}
+                maxLength={8}
+                onChange={(e) => setSenha(e.target.value)}
+                onBlur={validate}
+              />
+              {senhaErr && <div className="invalid-feedback">
+                A senha deve incluir: 8 dígitos, incluindo uma letra maiúscula e um número
+              </div>}
+
+              <div className="mb-3">
+                <p>Sexo</p>
+                <div className="form-check form-check-inline">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="sexo"
+                    id="masculino"
+                    value="masculino"
+                    disabled={check}
+                    checked={sexo === 'masculino'}
+                    onChange={handleChangue}
+                  />
+                  <label className="form-check-label" htmlFor="masculino">Masculino</label>
+                </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="sexo"
+                    id="feminino"
+                    value="feminino"
+                    disabled={check}
+                    checked={sexo === 'feminino'}
+                    onChange={handleChangue}
+                  />
+                  <label className="form-check-label" htmlFor="feminino">Feminino</label>
+                </div>
+              </div>
             </div>
-            {senhaErr &&
-                <small>
-                    A senha deve incluir: 8 dígitos , incluíndo uma letra maiúscula e um número
-                </small>
-            }
-
-                <div className="gender-field div m-2"  onChange={(event) => setSexo (event.target.value)}>
-                    <p>Sexo</p>
-                    <div className="radio-field div" >
-                        <label htmlFor="masculino" >Masculino</label>
-                        <Input
-                            disabled={check}
-                            type="radio"
-                            value="masculino"
-                            id="masculino"
-                            className="input mx-1"
-                            checked={sexo === 'masculino'}
-                            onChange={handleChangue}
-                        />
-                        <label className="mx-2" htmlFor="feminino">Feminino</label>
-                        <Input
-                            disabled={check}
-                            type="radio"
-                            id="feminino"
-                            value="feminino"
-                            className="input mx-1"
-                            checked={sexo==='feminino'}
-                            onChange={handleChangue}
-                        />
-                    </div>
-                </div>
-                </div>
-                </ModalBody>
-                <ModalFooter>
-                    <Button onClick={()=>{
-                        save()
-                    }}>Salvar</Button>
-                    <Button onClick={()=>setCheck(false)}>Editar</Button>
-                </ModalFooter>
-                </Form>
-            </Modal>
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-primary" onClick={save}>Salvar</button>
+            <button className="btn btn-secondary" onClick={() => setCheck(false)}>Editar</button>
+          </div>
         </div>
-    )
+      </div>
+    </div>
+  );
 }
-export default ModalSetting
+
+export default ModalSetting;
